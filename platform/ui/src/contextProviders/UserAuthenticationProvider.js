@@ -88,6 +88,7 @@ export function UserAuthenticationProvider({ children, service }) {
    *
    * @returns void
    */
+  // TODO: should this be a useEffect or not?
   useEffect(() => {
     if (service) {
       service.setServiceImplementation({
@@ -99,6 +100,17 @@ export function UserAuthenticationProvider({ children, service }) {
       });
     }
   }, [getState, service, setUser, getUser, reset, set]);
+
+  // Add a useEffect with no arguments to ensure this is setup before any children render
+  if (service) {
+    service.setServiceImplementation({
+      getState,
+      setUser,
+      getUser,
+      reset,
+      set,
+    });
+  }
 
   const api = {
     getState,

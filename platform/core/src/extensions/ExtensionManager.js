@@ -309,7 +309,7 @@ export default class ExtensionManager {
     extensionModule.forEach(element => {
       const namespace = `${extensionId}.${MODULE_TYPES.HANGING_PROTOCOL}.${element.name}`;
 
-      dataSources.forEach(dataSource => {
+      /*dataSources.forEach(dataSource => {
         if (dataSource.namespace === namespace) {
           const dataSourceInstance = element.createDataSource(
             dataSource.configuration
@@ -321,12 +321,12 @@ export default class ExtensionManager {
             this.dataSourceMap[dataSource.sourceName] = [dataSourceInstance];
           }
         }
-      });
+      });*/
     });
 
     extensionModule.forEach(element => {
       this.modulesMap[
-        `${extensionId}.${MODULE_TYPES.DATA_SOURCE}.${element.name}`
+        `${extensionId}.${MODULE_TYPES.HANGING_PROTOCOL}.${element.name}`
       ] = element;
     });
   }
