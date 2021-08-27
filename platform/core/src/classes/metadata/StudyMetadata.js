@@ -118,7 +118,7 @@ class StudyMetadata extends Metadata {
         displaySetInstanceUID: displaySet.uid,
         SeriesInstanceUID: seriesData.SeriesInstanceUID,
         SeriesDescription: seriesData.SeriesDescription,
-        SeriesNumber: seriesData.SeriesNumber,
+        SeriesNumber: Number(seriesData.SeriesNumber),
         Modality: seriesData.Modality,
       });
 
@@ -227,7 +227,6 @@ class StudyMetadata extends Metadata {
     displaySets.map(displaySet => this._derivedDisplaySets.push(displaySet));
   }
 
-
   /**
    * Returns the source display set of the derivated display set.
    * @param {object} derivatedDisplaySet
@@ -272,10 +271,9 @@ class StudyMetadata extends Metadata {
       const referencedDisplaySet = otherDisplaySets.find(ds =>
         referencedSeriesInstanceUIDs.includes(ds.SeriesInstanceUID)
       );
-      ;
       return referencedDisplaySet;
     }
-  };
+  }
 
   /**
    * Returns a list of derived datasets in the study, filtered by the given filter.
