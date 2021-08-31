@@ -12,7 +12,7 @@ function StudyBrowser(props) {
   } = props;
 
   return (
-    <div className="study-browser">
+    <div className="study-browser ohif-scrollbar">
       <div className="scrollable-study-thumbnails">
         {studies
           .map((study, studyIndex) => {
