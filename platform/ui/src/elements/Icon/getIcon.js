@@ -13,6 +13,7 @@ import brush from './icons/brush.svg';
 import caretDown from './icons/caret-down.svg';
 import caretUp from './icons/caret-up.svg';
 import check from './icons/check.svg';
+import text from './icons/text.svg';
 import checkCircle from './icons/check-circle.svg';
 import checkCircleO from './icons/check-circle-o.svg';
 import chevronDown from './icons/chevron-down.svg';
@@ -91,6 +92,7 @@ import eyeClosed from './icons/eye-closed.svg';
 import envelopeSquare from './icons/envelope-square.svg';
 
 const ICONS = {
+  text,
   eye,
   'eye-closed': eyeClosed,
   brush,

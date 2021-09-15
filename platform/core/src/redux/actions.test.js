@@ -11,6 +11,8 @@ describe('actions', () => {
       'setLayout',
       'clearViewportSpecificData',
       'setActiveViewportSpecificData',
+      'setStudyLoadingProgress',
+      'clearStudyLoadingProgress',
       'setUserPreferences',
       'setExtensionData',
       'setTimepoints',

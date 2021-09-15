@@ -4,8 +4,6 @@ import CommandsManager from './CommandsManager.js';
 import { DICOMFileLoadingListener } from './StudyLoadingListener';
 import HotkeysManager from './HotkeysManager.js';
 import ImageSet from './ImageSet';
-import LogManager from './LogManager';
-import PubSub from './PubSub';
 import MetadataProvider from './MetadataProvider';
 import OHIFError from './OHIFError.js';
 import { OHIFStudyMetadataSource } from './OHIFStudyMetadataSource';
@@ -38,9 +36,7 @@ const classes = {
   MetadataProvider,
   CommandsManager,
   HotkeysManager,
-  LogManager,
   ImageSet,
-  PubSub,
   StudyPrefetcher,
   StudyLoadingListener,
   StackLoadingListener,

@@ -35,6 +35,9 @@
   "dependencies": {
     "@babel/runtime": "^7.5.5",
     "classnames": "^2.2.6",
-    "dicom-microscopy-viewer": "^0.6.1"
+    "dicom-microscopy-viewer": "git://github.com/RadicalImaging/dicom-microscopy-viewer.git#annotations-18",
+    "file-type": "10.10.0",
+    "mathjs": "^7.1",
+    "ol": "^6.5"
   }
 }

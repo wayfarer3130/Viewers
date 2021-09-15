@@ -46,8 +46,51 @@ const ViewportGrid = function(props) {
     }
   }, [studies, viewportData, isStudyLoaded, snackbar]);
 
-  const getViewportPanes = () =>
-    layout.viewports.map((layout, viewportIndex) => {
+  const getViewportPanes = () => {
+    let shouldReset = false;
+    let newVTKMPR = false;
+    let newVTKMPRViewportIndex;
+
+    layout.viewports.forEach((layout, viewportIndex) => {
+      const displaySet = viewportData[viewportIndex];
+
+      let pluginName =
+        !layout.plugin && displaySet && displaySet.plugin
+          ? displaySet.plugin
+          : layout.plugin;
+
+      if (displaySet && displaySet.plugin === 'vtk-new-mpr2D') {
+        newVTKMPR = true;
+        newVTKMPRViewportIndex = viewportIndex;
+      }
+
+      if (pluginName === 'cornerstone-reset') {
+        shouldReset = true;
+      }
+    });
+
+    if (layout && shouldReset) {
+      layout.plugin = 'cornerstone';
+      layout.viewports.forEach((viewport, viewportIndex) => {
+        const displaySet = viewportData[viewportIndex];
+        if (displaySet) displaySet.plugin = 'cornerstone';
+        viewport.plugin = 'cornerstone';
+      });
+    } else if (newVTKMPR) {
+      window.ohif.app.commandsManager.runCommand('mpr2d', {
+        viewportIndexToUse: newVTKMPRViewportIndex,
+      });
+
+      layout.plugin = 'vtk';
+      layout.viewports.forEach((viewport, viewportIndex) => {
+        const displaySet = viewportData[viewportIndex];
+        displaySet.plugin = 'cornerstone';
+        // Plugin set by layout, only added to catch it on single viewport change, delete here.
+        delete viewport.plugin;
+      });
+    }
+
+    return layout.viewports.map((layout, viewportIndex) => {
       const displaySet = viewportData[viewportIndex];
 
       if (!displaySet) {
@@ -71,7 +114,7 @@ const ViewportGrid = function(props) {
       // in the viewport is capable of rendering this display set. If not
       // then use the most capable available plugin
 
-      const pluginName =
+      let pluginName =
         !layout.plugin && displaySet && displaySet.plugin
           ? displaySet.plugin
           : layout.plugin;
@@ -98,6 +141,7 @@ const ViewportGrid = function(props) {
         </ViewportPane>
       );
     });
+  };
 
   const ViewportPanes = React.useMemo(getViewportPanes, [
     layout,

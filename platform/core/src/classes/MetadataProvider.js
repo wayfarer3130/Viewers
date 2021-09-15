@@ -231,26 +231,26 @@ class MetadataProvider {
         let columnCosines;
 
         if (PixelSpacing) {
-          rowPixelSpacing = validNumber(PixelSpacing[0]);
-          columnPixelSpacing = validNumber(PixelSpacing[1]);
+          rowPixelSpacing = PixelSpacing[0];
+          columnPixelSpacing = PixelSpacing[1];
         }
 
         if (ImageOrientationPatient) {
-          rowCosines = validNumber(ImageOrientationPatient.slice(0, 3));
-          columnCosines = validNumber(ImageOrientationPatient.slice(3, 6));
+          rowCosines = ImageOrientationPatient.slice(0, 3);
+          columnCosines = ImageOrientationPatient.slice(3, 6);
         }
 
         metadata = {
           frameOfReferenceUID: instance.FrameOfReferenceUID,
           rows: instance.Rows,
           columns: instance.Columns,
-          imageOrientationPatient: validNumber(ImageOrientationPatient),
+          imageOrientationPatient: ImageOrientationPatient,
           rowCosines,
           columnCosines,
-          imagePositionPatient: validNumber(instance.ImagePositionPatient),
-          sliceThickness: validNumber(instance.SliceThickness),
-          sliceLocation: validNumber(instance.SliceLocation),
-          pixelSpacing: validNumber(PixelSpacing),
+          imagePositionPatient: instance.ImagePositionPatient,
+          sliceThickness: instance.SliceThickness,
+          sliceLocation: instance.SliceLocation,
+          pixelSpacing: PixelSpacing,
           rowPixelSpacing,
           columnPixelSpacing,
         };
@@ -410,6 +410,11 @@ class MetadataProvider {
         metadata = {
           patientName,
           patientId: instance.PatientID,
+          patientSex: instance.PatientSex,
+          patientBirthDate: instance.PatientBirthDate,
+          otherpatientIds: instance.OtherPatientIDsRETIRED,
+          patientSpeciesDescription: instance.PatientSpeciesDescription,
+          patientBreedDescription: instance.PatientBreedDescription,
         };
 
         break;

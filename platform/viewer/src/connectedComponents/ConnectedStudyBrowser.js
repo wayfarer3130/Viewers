@@ -1,10 +1,48 @@
 import OHIF from '@ohif/core';
 import { connect } from 'react-redux';
+import { StudyBrowser } from '@ohif/ui';
+import cloneDeep from 'lodash.clonedeep';
 import findDisplaySetByUID from './findDisplaySetByUID';
 import { servicesManager } from './../App.js';
-import { StudyBrowser } from '../../../ui/src/components/studyBrowser/StudyBrowser';
+
+const { studyMetadataManager } = OHIF.utils;
 
 const { setActiveViewportSpecificData } = OHIF.redux.actions;
+
+// TODO
+// - Determine in which display set is active from Redux (activeViewportIndex and layout viewportData)
+// - Pass in errors and stack loading progress from Redux
+const mapStateToProps = (state, ownProps) => {
+  // If we know that the stack loading progress details have changed,
+  // we can try to update the component state so that the thumbnail
+  // progress bar is updated
+  const stackLoadingProgressMap = state.loading.progress;
+  const studiesWithLoadingData = cloneDeep(ownProps.studies);
+
+  studiesWithLoadingData.forEach(study => {
+    study.thumbnails.forEach(data => {
+      const { displaySetInstanceUID } = data;
+      const stackId = `StackProgress:${displaySetInstanceUID}`;
+      const stackProgressData = stackLoadingProgressMap[stackId];
+
+      const { activeViewportIndex, viewportSpecificData } = state.viewports;
+      const viewportData = viewportSpecificData[activeViewportIndex] || {};
+      data.active =
+        viewportData.displaySetInstanceUID === displaySetInstanceUID;
+
+      let stackPercentComplete = 0;
+      if (stackProgressData) {
+        stackPercentComplete = stackProgressData.percentComplete;
+      }
+
+      data.stackPercentComplete = stackPercentComplete;
+    });
+  });
+
+  return {
+    studies: studiesWithLoadingData,
+  };
+};
 
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
@@ -17,10 +55,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
       if (displaySet.isDerived) {
         const { Modality } = displaySet;
         if (Modality === 'SEG' && servicesManager) {
-          const {
-            LoggerService,
-            UINotificationService,
-          } = servicesManager.services;
+          const {LoggerService, UINotificationService} = servicesManager.services;
           const onDisplaySetLoadFailureHandler = error => {
             LoggerService.error({ error, message: error.message });
             UINotificationService.show({
@@ -31,25 +66,20 @@ const mapDispatchToProps = (dispatch, ownProps) => {
             });
           };
 
-          const {
-            referencedDisplaySet,
-            activatedLabelmapPromise,
-          } = displaySet.getSourceDisplaySet(
+          const {referencedDisplaySet, activatedLabelmapPromise} = displaySet.getSourceDisplaySet(
             ownProps.studyMetadata,
             true,
             onDisplaySetLoadFailureHandler
           );
           displaySet = referencedDisplaySet;
 
-          activatedLabelmapPromise.then(activatedLabelmapIndex => {
-            const selectionFired = new CustomEvent(
-              'extensiondicomsegmentationsegselected',
-              {
-                detail: { activatedLabelmapIndex: activatedLabelmapIndex },
-              }
-            );
+          activatedLabelmapPromise.then((activatedLabelmapIndex) => {
+            const selectionFired = new CustomEvent("extensiondicomsegmentationsegselected", {
+              "detail": {"activatedLabelmapIndex":activatedLabelmapIndex}
+            });
             document.dispatchEvent(selectionFired);
           });
+
         } else {
           displaySet = displaySet.getSourceDisplaySet(ownProps.studyMetadata);
         }
@@ -71,7 +101,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 };
 
 const ConnectedStudyBrowser = connect(
-  null,
+  mapStateToProps,
   mapDispatchToProps
 )(StudyBrowser);
 

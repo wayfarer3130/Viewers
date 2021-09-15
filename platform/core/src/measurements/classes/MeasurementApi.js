@@ -843,6 +843,31 @@ export default class MeasurementApi {
     // this.timepointChanged.set(timepoint.timepointId);
   }
 
+  /**
+   * Batch operation to update multiple measurements at once
+   * @param {Array} measurementList 
+   */
+  updateMeasurements(measurementList = []) {
+    
+    // update measurements stored into this API
+    for(let data of measurementList) {
+      const {toolType, measurementData} = data;
+      const collection = this.tools[toolType];
+  
+      const toolIndex = collection.findIndex(
+        tool => tool._id === measurementData._id
+      );
+      if (toolIndex < 0) {
+        return;
+      }
+  
+      collection[toolIndex] = Object.assign({}, measurementData);
+    }
+
+    // Let others know that the measurements are updated
+    this.onMeasurementsUpdated();
+  }
+
   onMeasurementRemoved(toolType, measurement) {
     const { lesionNamingNumber, measurementNumber } = measurement;
 

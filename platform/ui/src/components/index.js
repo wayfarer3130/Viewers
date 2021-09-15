@@ -22,6 +22,7 @@ import {
   StudyList,
   TableSearchFilter,
   TablePagination,
+  SearchBtn,
 } from './studyList';
 import { ToolbarSection } from './toolbarSection';
 import { Tooltip } from './tooltip';
@@ -43,6 +44,7 @@ export {
   RoundedButtonGroup,
   PageToolbar,
   SelectTree,
+  SearchBtn,
   SimpleDialog,
   StudyBrowser,
   StudyList,

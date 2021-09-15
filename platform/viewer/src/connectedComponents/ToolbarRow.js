@@ -54,6 +54,7 @@ class ToolbarRow extends Component {
     this.state = {
       toolbarButtons: toolbarButtonDefinitions,
       activeButtons: [],
+      activeToggables: [],
     };
 
     this.seriesPerStudyCount = [];
@@ -96,8 +97,6 @@ class ToolbarRow extends Component {
             value: menuOption.target,
             icon: menuOption.icon,
             bottomLabel: menuOption.label,
-            badgeNumber: menuOption.badgeNumber,
-            stateEvent: menuOption.stateEvent,
           };
           const from = menuOption.from || 'right';
 
@@ -405,6 +404,22 @@ function _handleBuiltIn(button) {
       });
       this.setState(state => ({
         dialogId: newDialogId,
+        activeButtons: [...state.activeButtons, button],
+      }));
+    }
+  }
+
+  if (options.toggable) {
+    if (this.state.activeToggables.includes(id)) {
+      this.setState(state => ({
+        activeToggables: state.activeToggables.filter(btnId => btnId !== id),
+        activeButtons: [
+          ...state.activeButtons.filter(button => button.id !== id),
+        ],
+      }));
+    } else {
+      this.setState(state => ({
+        activeToggables: [...state.activeToggables, id],
         activeButtons: [...state.activeButtons, button],
       }));
     }

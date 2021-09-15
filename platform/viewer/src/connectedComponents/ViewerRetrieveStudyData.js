@@ -15,25 +15,23 @@ const { OHIFStudyMetadata, OHIFSeriesMetadata } = metadata;
 const { retrieveStudiesMetadata, deleteStudyMetadataPromise } = studies;
 const { studyMetadataManager, makeCancelable } = utils;
 
-const _promoteToFront = (list, values, searchMethod) => {
-  let listCopy = [...list];
-  let response = [];
-  let promotedCount = 0;
+const _promoteToFront = (list, value, searchMethod) => {
+  let response = [...list];
+  let promoted = false;
+  const index = response.findIndex(searchMethod.bind(undefined, value));
 
-  const arrayValues = values.split(',');
-  arrayValues.forEach(value => {
-    const index = listCopy.findIndex(searchMethod.bind(undefined, value));
+  if (index > 0) {
+    const first = response.splice(index, 1);
+    response = [...first, ...response];
+  }
 
-    if (index >= 0) {
-      const [itemToPromote] = listCopy.splice(index, 1);
-      response[promotedCount] = itemToPromote;
-      promotedCount++;
-    }
-  });
+  if (index >= 0) {
+    promoted = true;
+  }
 
   return {
-    promoted: promotedCount === arrayValues.length,
-    data: [...response, ...listCopy],
+    promoted,
+    data: response,
   };
 };
 
@@ -76,6 +74,24 @@ const _promoteStudyDisplaySet = (study, studyMetadata, filters) => {
   }
 
   return promoted;
+};
+
+/**
+ * Returns the frame of a SOPInstanceUID from a given displaySet. If the SOPInstanceUID
+ * is not in this displayset, it will return undefined;
+ *
+ * @param {*} displaySet displaySet to be displayed
+ * @param {string} SOPInstanceUID SOPIntanceUID of the frame to be hung
+ * @returns {number} the FrameIndex of the SOPInstanceUID in the given displaySet
+ */
+const _findSOPInstanceUIDFrame = (displaySet, SOPInstanceUID) => {
+  const frameIndex = displaySet.images.findIndex(
+    image => image.SOPInstanceUID === SOPInstanceUID
+  );
+
+  if (frameIndex !== -1) {
+    return frameIndex;
+  }
 };
 
 /**
@@ -150,23 +166,23 @@ const _showUserMessage = (queryParamApplied, message, dialog = {}) => {
   });
 };
 
-const _addSeriesToStudy = (studyMetadata, series) => {
+const _addSeriesToStudy = async (studyMetadata, series) => {
   const sopClassHandlerModules =
     extensionManager.modules['sopClassHandlerModule'];
   const study = studyMetadata.getData();
   const seriesMetadata = new OHIFSeriesMetadata(series, study);
   const existingSeries = studyMetadata.getSeriesByUID(series.SeriesInstanceUID);
+
   if (existingSeries) {
     studyMetadata.updateSeries(series.SeriesInstanceUID, seriesMetadata);
   } else {
     studyMetadata.addSeries(seriesMetadata);
   }
 
-  studyMetadata.createAndAddDisplaySetsForSeries(
+  await studyMetadata.createAndAddDisplaySetsForSeries(
     sopClassHandlerModules,
     seriesMetadata
   );
-
   study.displaySets = studyMetadata.getDisplaySets();
   study.derivedDisplaySets = studyMetadata.getDerivedDatasets({
     Modality: series.Modality,
@@ -183,12 +199,14 @@ const _updateStudyMetadataManager = (study, studyMetadata) => {
   }
 };
 
-const _updateStudyDisplaySets = (study, studyMetadata) => {
+const _updateStudyDisplaySets = async (study, studyMetadata) => {
   const sopClassHandlerModules =
     extensionManager.modules['sopClassHandlerModule'];
 
   if (!study.displaySets) {
-    study.displaySets = studyMetadata.createDisplaySets(sopClassHandlerModules);
+    study.displaySets = await studyMetadata.createDisplaySets(
+      sopClassHandlerModules
+    );
   }
 
   if (study.derivedDisplaySets) {
@@ -209,8 +227,9 @@ function ViewerRetrieveStudyData({
   server,
   studyInstanceUIDs,
   seriesInstanceUIDs,
+  sopInstanceUID,
   clearViewportSpecificData,
-  setStudyData,
+  setFirstViewportSpecificData,
 }) {
   // hooks
   const [error, setError] = useState(false);
@@ -233,6 +252,10 @@ function ViewerRetrieveStudyData({
    * @param {string} [filter.seriesInstanceUID] - series instance uid to filter results against
    */
   const studyDidLoad = (study, studyMetadata, filters) => {
+    const seriesInstanceUID =
+      seriesInstanceUIDs && seriesInstanceUIDs.length > 0
+        ? seriesInstanceUIDs[0]
+        : undefined;
     // User message
     const promoted = _promoteList(
       study,
@@ -244,6 +267,29 @@ function ViewerRetrieveStudyData({
     // Clear viewport to allow new promoted one to be displayed
     if (promoted) {
       clearViewportSpecificData(0);
+    }
+
+    if (seriesInstanceUID) {
+      const displaySet = study.displaySets.find(
+        displaySet => displaySet.SeriesInstanceUID === seriesInstanceUID
+      );
+
+      if (displaySet) {
+        if (sopInstanceUID) {
+          const frameIndex = _findSOPInstanceUIDFrame(
+            displaySet,
+            sopInstanceUID
+          );
+
+          setFirstViewportSpecificData({ ...displaySet, frameIndex });
+        } else {
+          setFirstViewportSpecificData(displaySet);
+        }
+      } else {
+        log.warn(
+          `Couldn't find a displaySet for the required SeriesInstanceUID: ${seriesInstanceUID}`
+        );
+      }
     }
 
     const isQueryParamApplied = _isQueryParamApplied(
@@ -267,17 +313,21 @@ function ViewerRetrieveStudyData({
    * @param {Object} [filters] - Object containing filters to be applied
    * @param {string} [filters.seriesInstanceUID] - series instance uid to filter results against
    */
-  const processStudies = (studiesData, filters) => {
+  const processStudies = async (studiesData, filters) => {
     if (Array.isArray(studiesData) && studiesData.length > 0) {
       // Map studies to new format, update metadata manager?
-      const studies = studiesData.map(study => {
-        setStudyData(study.StudyInstanceUID, _thinStudyData(study));
+      const seriesInstanceUID =
+        seriesInstanceUIDs && seriesInstanceUIDs.length > 0
+          ? seriesInstanceUIDs[0]
+          : undefined;
+      let studies = studiesData.map(async study => {
+        //setStudyData(study.StudyInstanceUID, _thinStudyData(study));
         const studyMetadata = new OHIFStudyMetadata(
           study,
           study.StudyInstanceUID
         );
 
-        _updateStudyDisplaySets(study, studyMetadata);
+        await _updateStudyDisplaySets(study, studyMetadata);
         _updateStudyMetadataManager(study, studyMetadata);
 
         // Attempt to load remaning series if any
@@ -287,6 +337,24 @@ function ViewerRetrieveStudyData({
           .then(result => {
             if (result && !result.isCanceled) {
               studyDidLoad(study, studyMetadata, filters);
+            } else if (
+              !result &&
+              study.displaySets &&
+              study.displaySets.length > 0
+            ) {
+              // When we are loading synchronously result will come undefined
+              if (seriesInstanceUID && sopInstanceUID) {
+                study.displaySets.forEach(displaySet => {
+                  if (displaySet.SeriesInstanceUID === seriesInstanceUID) {
+                    const frameIndex = _findSOPInstanceUIDFrame(
+                      displaySet,
+                      sopInstanceUID
+                    );
+
+                    setFirstViewportSpecificData({ ...displaySet, frameIndex });
+                  }
+                });
+              }
             }
           })
           .catch(error => {
@@ -302,6 +370,8 @@ function ViewerRetrieveStudyData({
         return study;
       });
 
+      studies = await Promise.all(studies);
+
       setStudies(studies);
     }
   };
@@ -315,7 +385,7 @@ function ViewerRetrieveStudyData({
     const loadNextSeries = async () => {
       if (!seriesLoader.hasNext()) return;
       const series = await seriesLoader.next();
-      _addSeriesToStudy(studyMetadata, series);
+      await _addSeriesToStudy(studyMetadata, series);
       forceRerender();
       return loadNextSeries();
     };
@@ -325,25 +395,28 @@ function ViewerRetrieveStudyData({
     const promises = Array(concurrentRequestsAllowed)
       .fill(null)
       .map(loadNextSeries);
-    const remainingPromises = await Promise.all(promises);
+    const remainingSeriesPromise = await Promise.all(promises);
+
+    /**
+     * Wait all series to load (which includes SR series)
+     * because there are instance checks when parsing the latest SR.
+     * If there are not instances loaded yet, the latest SR
+     * is not going to be loaded by default.
+     */
     setIsStudyLoaded(true);
-    return remainingPromises;
+
+    return remainingSeriesPromise;
   };
 
   const loadStudies = async () => {
     try {
-      const filters = {};
-      // Use the first, discard others
-      const seriesInstanceUID = seriesInstanceUIDs && seriesInstanceUIDs[0];
-      const retrieveParams = [server, studyInstanceUIDs];
-
-      if (seriesInstanceUID) {
-        filters.seriesInstanceUID = seriesInstanceUID;
+      const filters = {
+        seriesInstanceUIDs: seriesInstanceUIDs ? seriesInstanceUIDs : [],
         // Query param filtering controlled by appConfig property
-        if (isFilterStrategy) {
-          retrieveParams.push(filters);
-        }
-      }
+        isFilterStrategy,
+      };
+
+      const retrieveParams = [server, studyInstanceUIDs, filters];
 
       if (
         appConfig.splitQueryParameterCalls ||
@@ -435,9 +508,10 @@ function ViewerRetrieveStudyData({
 ViewerRetrieveStudyData.propTypes = {
   studyInstanceUIDs: PropTypes.array.isRequired,
   seriesInstanceUIDs: PropTypes.array,
+  sopInstanceUID: PropTypes.string,
   server: PropTypes.object,
   clearViewportSpecificData: PropTypes.func.isRequired,
-  setStudyData: PropTypes.func.isRequired,
+  setFirstViewportSpecificData: PropTypes.func.isRequired,
 };
 
 export default ViewerRetrieveStudyData;

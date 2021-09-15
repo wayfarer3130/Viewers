@@ -95,7 +95,6 @@ async function makeSOPInstance(server, study, instance) {
   const naturalizedInstance = await metadataProvider.addInstance(instance, {
     server,
   });
-
   const {
     StudyInstanceUID,
     SeriesInstanceUID,

@@ -37,6 +37,8 @@ function StudyList(props) {
     onSelectItem: handleSelectItem,
     studyListDateFilterNumDays,
     displaySize,
+    fetchStudies,
+    enableSearchOnEnter = true,
   } = props;
   const { t, ready: translationsAreReady } = useTranslation('StudyList');
 
@@ -139,6 +141,8 @@ function StudyList(props) {
             sortFieldName={sort.fieldName}
             sortDirection={sort.direction}
             studyListDateFilterNumDays={studyListDateFilterNumDays}
+            fetchStudies={fetchStudies}
+            enableSearchOnEnter={enableSearchOnEnter}
           />
         </tr>
       </thead>
@@ -223,9 +227,13 @@ StudyList.propTypes = {
   onFilterChange: PropTypes.func.isRequired,
   studyListDateFilterNumDays: PropTypes.number,
   displaySize: PropTypes.string,
+  fetchStudies: PropTypes.func,
+  enableSearchOnEnter: PropTypes.bool,
 };
 
-StudyList.defaultProps = {};
+StudyList.defaultProps = {
+  enableSearchOnEnter: true,
+};
 
 function TableRow(props) {
   const {

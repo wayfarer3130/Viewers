@@ -65,10 +65,18 @@ class SimpleDialog extends Component {
               </div>
               <div className="content">{this.props.children}</div>
               <div className="footer">
-                <button className="btn btn-default" onClick={this.onClose}>
+                <button
+                  className="btn btn-default"
+                  type="button"
+                  onClick={this.onClose}
+                >
                   Cancel
                 </button>
-                <button className="btn btn-primary" onClick={this.onConfirm}>
+                <button
+                  className="btn btn-primary"
+                  type="submit"
+                  onClick={this.onConfirm}
+                >
                   Confirm
                 </button>
               </div>

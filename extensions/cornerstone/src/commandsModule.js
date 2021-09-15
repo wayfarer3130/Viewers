@@ -247,9 +247,7 @@ const commandsModule = ({ servicesManager }) => {
       cornerstoneTools.removeToolState(element, toolType, tool);
       cornerstone.updateImage(element);
     },
-    setCornerstoneLayout: () => {
-      setCornerstoneLayout();
-    },
+    setCornerstoneLayout,
     setWindowLevel: ({ viewports, window, level }) => {
       const enabledElement = getEnabledElement(viewports.activeViewportIndex);
 

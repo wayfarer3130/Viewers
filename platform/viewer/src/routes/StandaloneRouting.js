@@ -144,7 +144,7 @@ class StandaloneRouting extends Component {
         const {
           studies: updatedStudies,
           studyInstanceUIDs: updatedStudiesInstanceUIDs,
-        } = _mapStudiesToNewFormat(studies);
+        } = await _mapStudiesToNewFormat(studies);
         studies = updatedStudies;
         studyInstanceUIDs = updatedStudiesInstanceUIDs;
       }
@@ -181,25 +181,27 @@ class StandaloneRouting extends Component {
   }
 }
 
-const _mapStudiesToNewFormat = studies => {
+const _mapStudiesToNewFormat = async studies => {
   studyMetadataManager.purge();
 
   /* Map studies to new format, update metadata manager? */
   const uniqueStudyUIDs = new Set();
-  const updatedStudies = studies.map(study => {
+  let updatedStudies = studies.map(async study => {
     const studyMetadata = new OHIFStudyMetadata(study, study.StudyInstanceUID);
 
     const sopClassHandlerModules =
       extensionManager.modules['sopClassHandlerModule'];
     study.displaySets =
       study.displaySets ||
-      studyMetadata.createDisplaySets(sopClassHandlerModules);
+      (await studyMetadata.createDisplaySets(sopClassHandlerModules));
 
     studyMetadataManager.add(studyMetadata);
     uniqueStudyUIDs.add(study.StudyInstanceUID);
 
     return study;
   });
+
+  updatedStudies = await Promise.all(updatedStudies);
 
   return {
     studies: updatedStudies,

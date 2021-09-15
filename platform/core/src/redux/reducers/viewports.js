@@ -170,6 +170,24 @@ const viewports = (state = DEFAULT_STATE, action) => {
         draftState.viewportSpecificData[action.viewportIndex] =
           draftState.viewportSpecificData[action.viewportIndex] || {};
 
+        if (
+          draftState.viewportSpecificData[action.viewportIndex].plugin ===
+          'vtk' &&
+          action.viewportSpecificData.plugin === 'cornerstone'
+        ) {
+          if (
+            draftState.viewportSpecificData[action.viewportIndex]
+              .displaySetInstanceUID ===
+            action.viewportSpecificData.displaySetInstanceUID
+          ) {
+            // If its the same just set it to vtk so it doesn't try to rebuild a new set.
+            action.viewportSpecificData.plugin = 'vtk';
+          } else {
+            // If new displaySet => trigger a new MPR.
+            action.viewportSpecificData.plugin = 'vtk-new-mpr2D';
+          }
+        }
+
         Object.keys(action.viewportSpecificData).forEach(key => {
           draftState.viewportSpecificData[action.viewportIndex][key] =
             action.viewportSpecificData[key];
@@ -198,13 +216,35 @@ const viewports = (state = DEFAULT_STATE, action) => {
         : action.viewportIndex;
 
       let viewportSpecificData = cloneDeep(state.viewportSpecificData);
-      viewportSpecificData[viewportIndex] = {
-        ...action.viewportSpecificData,
-      };
+
+      if (
+        state.viewportSpecificData[viewportIndex].plugin === 'vtk' &&
+        action.viewportSpecificData.plugin === 'cornerstone'
+      ) {
+        viewportSpecificData[viewportIndex] = {
+          ...viewportSpecificData[viewportIndex],
+          ...action.viewportSpecificData
+        };
+
+        if (
+          state.viewportSpecificData[viewportIndex].displaySetInstanceUID ===
+          action.viewportSpecificData.displaySetInstanceUID
+        ) {
+          // If its the same just set it to vtk so it doesn't try to rebuild a new set.
+          viewportSpecificData[viewportIndex].plugin = 'vtk';
+        } else {
+          // If new displaySet => trigger a new MPR.
+          viewportSpecificData[viewportIndex].plugin = 'vtk-new-mpr2D';
+        }
+      } else {
+        viewportSpecificData[viewportIndex] = {
+          ...viewportSpecificData[viewportIndex],
+          ...action.viewportSpecificData
+        };
+      }
 
       if (action.viewportSpecificData && action.viewportSpecificData.plugin) {
-        layout.viewports[viewportIndex].plugin =
-          action.viewportSpecificData.plugin;
+        layout.viewports[viewportIndex].plugin = action.viewportSpecificData.plugin;
       }
 
       return { ...state, layout, viewportSpecificData };

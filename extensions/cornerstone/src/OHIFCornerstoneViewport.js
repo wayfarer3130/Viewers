@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import OHIFCornerstoneViewportOverlay from './components/OHIFCornerstoneViewportOverlay';
+import OHIFCornerstoneViewportOverlay from './components/OHIFCornerstoneViewportOverlay'
 import ConnectedCornerstoneViewport from './ConnectedCornerstoneViewport';
 import OHIF from '@ohif/core';
 import PropTypes from 'prop-types';
@@ -15,7 +15,6 @@ class OHIFCornerstoneViewport extends Component {
 
   static defaultProps = {
     customProps: {},
-    isStackPrefetchEnabled: true,
   };
 
   static propTypes = {
@@ -24,8 +23,7 @@ class OHIFCornerstoneViewport extends Component {
     viewportIndex: PropTypes.number,
     children: PropTypes.node,
     customProps: PropTypes.object,
-    stackPrefetch: PropTypes.object,
-    isStackPrefetchEnabled: PropTypes.bool,
+    viewportOverlayComponent: PropTypes.func,
   };
 
   static id = 'OHIFCornerstoneViewport';
@@ -183,7 +181,7 @@ class OHIFCornerstoneViewport extends Component {
 
     if (
       displaySet.displaySetInstanceUID !==
-        prevDisplaySet.displaySetInstanceUID ||
+      prevDisplaySet.displaySetInstanceUID ||
       displaySet.SOPInstanceUID !== prevDisplaySet.SOPInstanceUID ||
       displaySet.frameIndex !== prevDisplaySet.frameIndex
     ) {
@@ -235,12 +233,7 @@ class OHIFCornerstoneViewport extends Component {
     };
 
     const warningsOverlay = props => {
-      return (
-        <OHIFCornerstoneViewportOverlay
-          {...props}
-          inconsistencyWarnings={inconsistencyWarnings}
-        />
-      );
+      return <OHIFCornerstoneViewportOverlay {...props} inconsistencyWarnings={inconsistencyWarnings} />
     };
 
     return (
@@ -250,13 +243,13 @@ class OHIFCornerstoneViewport extends Component {
           imageIds={imageIds}
           imageIdIndex={currentImageIdIndex}
           onNewImageDebounced={newImageHandler}
+          viewportOverlayComponent={this.props.viewportOverlayComponent}
           onNewImageDebounceTime={300}
           viewportOverlayComponent={warningsOverlay}
-          stackPrefetch={this.props.stackPrefetch}
-          isStackPrefetchEnabled={this.props.isStackPrefetchEnabled}
           // ~~ Connected (From REDUX)
           // frameRate={frameRate}
           // isPlaying={false}
+          // isStackPrefetchEnabled={true}
           // onElementEnabled={() => {}}
           // setViewportActive{() => {}}
           {...this.props.customProps}

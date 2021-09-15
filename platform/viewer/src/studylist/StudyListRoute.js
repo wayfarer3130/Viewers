@@ -9,6 +9,7 @@ import {
   TablePagination,
   useDebounce,
   useMedia,
+  SearchBtn,
 } from '@ohif/ui';
 import ConnectedHeader from '../connectedComponents/ConnectedHeader.js';
 import * as RoutesUtil from '../routes/routesUtil';
@@ -55,6 +56,8 @@ function StudyListRoute(props) {
   const [activeModalId, setActiveModalId] = useState(null);
   const [rowsPerPage, setRowsPerPage] = useState(25);
   const [pageNumber, setPageNumber] = useState(0);
+
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const appContext = useContext(AppContext);
   // ~~ RESPONSIVE
   const displaySize = useMedia(
@@ -78,45 +81,82 @@ function StudyListRoute(props) {
     setActiveModalId('DicomStorePicker');
   }
 
+  /**
+   * Fetch studies from PACS via DICOMWeb
+   *
+   * @param {boolean} [useDebouncedValues=true] Whether or not to call the function using
+   * filter values which are being debounced or not. By default, it will pull filters and
+   * sorting from the reactive variables that are updated while typing. If set to false, it
+   * will pull the current state of the filters. This is required when you need to execute
+   * the query immediately (e.g. pressing Enter or clicking the Search button, if enabled).
+   */
+  const fetchStudies = async (useDebouncedValues = true) => {
+    try {
+      setSearchStatus({ error: null, isSearchingForStudies: true });
+
+      let response = [];
+
+      if (useDebouncedValues) {
+        response = await getStudyList(
+          server,
+          debouncedFilters,
+          debouncedSort,
+          rowsPerPage,
+          pageNumber,
+          displaySize
+        );
+      } else {
+        response = await getStudyList(
+          server,
+          filterValues,
+          sort,
+          rowsPerPage,
+          pageNumber,
+          displaySize
+        );
+      }
+
+      setStudies(response);
+      setSearchStatus({ error: null, isSearchingForStudies: false });
+    } catch (error) {
+      console.warn(error);
+      setSearchStatus({ error: true, isFetching: false });
+    }
+  };
+
+  // For the Search button, do not use debounced filter values for searching
+  const fetchStudiesWithNoDebounce = () => fetchStudies(false);
+
   // Called when relevant state/props are updated
   // Watches filters and sort, debounced
   useEffect(
     () => {
-      const fetchStudies = async () => {
-        try {
-          setSearchStatus({ error: null, isSearchingForStudies: true });
-
-          const response = await getStudyList(
-            server,
-            debouncedFilters,
-            debouncedSort,
-            rowsPerPage,
-            pageNumber,
-            displaySize
-          );
-
-          setStudies(response);
-          setSearchStatus({ error: null, isSearchingForStudies: false });
-        } catch (error) {
-          console.warn(error);
-          setSearchStatus({ error: true, isFetching: false });
-        }
-      };
-
-      if (server) {
+      // If there is no `enableSearchOnFilterChange` use the default behavior to enable search by filter change
+      if (server && appConfig.enableSearchOnFilterChange) {
         fetchStudies();
       }
     },
     // TODO: Can we update studies directly?
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      debouncedFilters,
-      debouncedSort,
-      rowsPerPage,
-      pageNumber,
-      displaySize,
-      server,
-    ]
+    [debouncedFilters, debouncedSort, displaySize, server]
+  );
+
+  useEffect(
+    () => {
+      if (isInitialLoad) {
+        setIsInitialLoad(false);
+      }
+
+      // If there is no `enableSearchOnFilterChange` use the default behavior to enable search by filter change
+      if (server) {
+        if (!appConfig.enableSearchOnFilterChange && !isInitialLoad) {
+          fetchStudies();
+        }
+      }
+    },
+    // TODO: Can we update studies directly?
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [rowsPerPage, pageNumber]
   );
 
   // TODO: Update Server
@@ -239,6 +279,9 @@ function StudyListRoute(props) {
               onImport={() => setActiveModalId('DicomFilesUploader')}
             />
           )}
+          {appConfig.enableStudySearchButton && (
+            <SearchBtn fetchStudies={fetchStudiesWithNoDebounce} />
+          )}
           <span className="study-count">{studies.length}</span>
         </div>
       </div>
@@ -264,6 +307,8 @@ function StudyListRoute(props) {
           onFilterChange={handleFilterChange}
           studyListDateFilterNumDays={appConfig.studyListDateFilterNumDays}
           displaySize={displaySize}
+          fetchStudies={fetchStudies}
+          enableSearchOnEnter={appConfig.enableSearchOnEnter}
         />
         {/* PAGINATION FOOTER */}
         <TablePagination

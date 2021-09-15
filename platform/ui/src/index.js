@@ -13,6 +13,7 @@ import {
   QuickSwitch,
   RoundedButtonGroup,
   SelectTree,
+  SearchBtn,
   SimpleDialog,
   StudyBrowser,
   StudyList,
@@ -66,6 +67,7 @@ import {
   ModalConsumer,
   useModal,
   withModal,
+  withTranslation,
   LoggerProvider,
   withLogger,
   useLogger,
@@ -100,6 +102,7 @@ export {
   Select,
   OldSelect,
   SelectTree,
+  SearchBtn,
   SimpleDialog,
   StudyBrowser,
   StudyList,
@@ -136,6 +139,7 @@ export {
   // Hooks
   useDebounce,
   useMedia,
+  withTranslation,
   // Utils
   ViewerbaseDragDropContext,
   asyncComponent,

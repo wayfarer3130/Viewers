@@ -76,6 +76,7 @@ class ViewerMain extends Component {
       (viewportAmount !== prevViewportAmount && !isVtk)
     ) {
       const displaySets = this.getDisplaySets(this.props.studies);
+
       this.setState({ displaySets }, this.fillEmptyViewportPanes);
     }
   }
@@ -92,6 +93,7 @@ class ViewerMain extends Component {
 
     for (let i = 0; i < layout.viewports.length; i++) {
       const viewportPane = viewportSpecificData[i];
+
       const isNonEmptyViewport =
         viewportPane &&
         viewportPane.StudyInstanceUID &&
@@ -128,8 +130,7 @@ class ViewerMain extends Component {
     });
   };
 
-  setViewportData = ({
-    viewportIndex,
+  getDisplaySet = ({
     StudyInstanceUID,
     displaySetInstanceUID,
   }) => {
@@ -171,7 +172,21 @@ class ViewerMain extends Component {
       }
     }
 
+    return displaySet;
+  };
+
+  setViewportData = ({
+    viewportIndex,
+    StudyInstanceUID,
+    displaySetInstanceUID,
+  }) => {
+    let displaySet = this.getDisplaySet({ StudyInstanceUID, displaySetInstanceUID });
     this.props.setViewportSpecificData(viewportIndex, displaySet);
+  };
+
+  setActiveViewportData = ({ StudyInstanceUID, displaySetInstanceUID, }) => {
+    let displaySet = this.getDisplaySet({ StudyInstanceUID, displaySetInstanceUID });
+    this.props.setActiveViewportSpecificData(displaySet);
   };
 
   render() {
@@ -185,7 +200,7 @@ class ViewerMain extends Component {
             isStudyLoaded={this.props.isStudyLoaded}
             studies={this.props.studies}
             viewportData={viewportData}
-            setViewportData={this.setViewportData}
+            setViewportData={this.setActiveViewportData}
           >
             {/* Children to add to each viewport that support children */}
           </ConnectedViewportGrid>

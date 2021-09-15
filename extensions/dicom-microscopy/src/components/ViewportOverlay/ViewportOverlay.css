@@ -1,0 +1,56 @@
+.ViewportOverlay {
+  height: 100%;
+  width: 100%;
+
+  display: inline-grid;
+  grid-template-columns: repeat(2, [col-start] 1fr);
+}
+
+.ViewportOverlay .box {
+  padding: 15px;
+  font-size: 21px;
+  color: black;
+  font-weight: bold;
+}
+
+.ViewportOverlay .box span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 300px;
+}
+
+.ViewportOverlay .box:nth-child(1) {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  flex-direction: column;
+}
+
+.ViewportOverlay .box:nth-child(2) {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-end;
+  flex-direction: column;
+}
+
+.ViewportOverlay .box:nth-child(3) {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  flex-direction: column;
+}
+
+.ViewportOverlay .box:nth-child(4) {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+  flex-direction: column;
+}
+
+.OpenLayersOverlay {
+  height: 100%;
+  width: 100%;
+  display: block !important;
+  pointer-events: none !important;
+}

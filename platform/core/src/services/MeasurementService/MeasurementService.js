@@ -260,6 +260,7 @@ class MeasurementService {
     const sourceInfo = this._getSourceInfo(source);
 
     if (!definition) {
+      console.log('TEST');
       log.warn('No source definition provided. Exiting early.');
       return;
     }

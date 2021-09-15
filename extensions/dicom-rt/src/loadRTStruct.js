@@ -90,11 +90,11 @@ export default async function loadRTStruct(
       const sopInstanceUID = ContourImageSequence
         ? ContourImageSequence.ReferencedSOPInstanceUID
         : _getClosestSOPInstanceUID(
-            ContourData,
-            ContourGeometricType,
-            NumberOfContourPoints,
-            imageIdSopInstanceUidPairs
-          );
+          ContourData,
+          ContourGeometricType,
+          NumberOfContourPoints,
+          imageIdSopInstanceUidPairs
+        );
       const imageId = _getImageId(imageIdSopInstanceUidPairs, sopInstanceUID);
 
       if (!imageId) {
@@ -171,13 +171,7 @@ export default async function loadRTStruct(
    * allows us to easily watch the module or the rtstruct loading process in any other component
    * without subscribing to external events.
    */
-  const event = new CustomEvent('extensiondicomrtrtloaded', {
-    detail: {
-      rtStructDisplaySet,
-      referencedDisplaySet,
-      studies,
-    },
-  });
+  const event = new CustomEvent('extensiondicomrtrtloaded');
   document.dispatchEvent(event);
 }
 
@@ -305,9 +299,7 @@ const _getImageId = (imageIdSopInstanceUidPairs, sopInstanceUID) => {
       imageIdSopInstanceUidPairsEntry.sopInstanceUID === sopInstanceUID
   );
 
-  return imageIdSopInstanceUidPairsEntry
-    ? imageIdSopInstanceUidPairsEntry.imageId
-    : null;
+  return imageIdSopInstanceUidPairsEntry ? imageIdSopInstanceUidPairsEntry.imageId : null;
 };
 
 function _getImageIdSopInstanceUidPairsForDisplaySet(

@@ -44,7 +44,7 @@ export class OHIFStudyMetadataSource extends StudyMetadataSource {
       }
 
       this.getByInstanceUID(studyInstanceUID)
-        .then(studyInfo => {
+        .then(async studyInfo => {
           // Create study metadata object
           const studyMetadata = new StudyMetadata(
             studyInfo,
@@ -52,7 +52,7 @@ export class OHIFStudyMetadataSource extends StudyMetadataSource {
           );
 
           // Get Study display sets
-          const displaySets = studyMetadata.createDisplaySets();
+          const displaySets = await studyMetadata.createDisplaySets();
 
           OHIFStudyMetadataSource._updateStudyCollections(studyMetadata);
           resolve(studyMetadata);

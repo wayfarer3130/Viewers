@@ -11,12 +11,12 @@ const setCornerstoneLayout = () => {
   const layout = {
     numRows: 1,
     numColumns: 1,
-    viewports: [{ plugin: 'cornerstone' }],
+    viewports: [{ plugin: 'cornerstone-reset' }],
   };
 
   const action = setLayout(layout);
 
   window.store.dispatch(action);
-}
+};
 
 export default setCornerstoneLayout;

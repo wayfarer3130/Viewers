@@ -224,20 +224,16 @@ const SegmentationPanel = ({
         )
       );
     };
-  }, [
-    activeIndex,
-    updateSegmentationComboBox,
-    viewports,
-  ]);
+  }, [activeIndex, viewports]);
 
-  const updateSegmentationComboBox = e => {
+  const updateSegmentationComboBox = (e) => {
     const index = e.detail.activatedLabelmapIndex;
     if (index !== -1) {
       setState(state => ({ ...state, selectedSegmentation: index }));
     } else {
       cleanSegmentationComboBox();
     }
-  };
+  }
 
   const cleanSegmentationComboBox = () => {
     setState(state => ({
@@ -249,7 +245,7 @@ const SegmentationPanel = ({
       isDisabled: true,
       selectedSegmentation: -1,
     }));
-  };
+  }
 
   const refreshSegmentations = () => {
     const activeViewport = getActiveViewport();
@@ -313,8 +309,7 @@ const SegmentationPanel = ({
     );
 
     const filteredReferencedSegDisplaysets = referencedSegDisplaysets.filter(
-      segDisplay => segDisplay.loadError !== true
-    );
+      (segDisplay => segDisplay.loadError !== true));
 
     return filteredReferencedSegDisplaysets.map((displaySet, index) => {
       const {

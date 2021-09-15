@@ -3,7 +3,6 @@ import DICOMWeb from './../../DICOMWeb';
 import ImageSet from './../ImageSet';
 import { InstanceMetadata } from './InstanceMetadata';
 import { Metadata } from './Metadata';
-import OHIFError from '../OHIFError';
 import { SeriesMetadata } from './SeriesMetadata';
 // - createStacks
 import { api } from 'dicomweb-client';
@@ -104,10 +103,9 @@ class StudyMetadata extends Metadata {
    * @param {SeriesMetadata} series The series metadata object from which the display sets will be created
    * @returns {Array} The list of display sets created for the given series object
    */
-  _createDisplaySetsForSeries(sopClassHandlerModules, series) {
+  async _createDisplaySetsForSeries(sopClassHandlerModules, series) {
     const study = this;
     const displaySets = [];
-
     const anyInstances = series.getInstanceCount() > 0;
 
     if (!anyInstances) {
@@ -118,7 +116,7 @@ class StudyMetadata extends Metadata {
         displaySetInstanceUID: displaySet.uid,
         SeriesInstanceUID: seriesData.SeriesInstanceUID,
         SeriesDescription: seriesData.SeriesDescription,
-        SeriesNumber: seriesData.SeriesNumber,
+        SeriesNumber: Number(seriesData.SeriesNumber),
         Modality: seriesData.Modality,
       });
 
@@ -129,24 +127,36 @@ class StudyMetadata extends Metadata {
 
     const sopClassUIDs = getSopClassUIDs(series);
 
+    let _instancesAlreadyMappedIntoADisplaySet = [];
     if (sopClassHandlerModules && sopClassHandlerModules.length > 0) {
-      const displaySet = _getDisplaySetFromSopClassModule(
+      const {
+        displaySets: displaySetsFromSopClassModule,
+        instancesAlreadyMappedIntoADisplaySet,
+      } = await _getDisplaySetsFromSopClassModule(
         sopClassHandlerModules,
         series,
         study,
         sopClassUIDs
       );
+      _instancesAlreadyMappedIntoADisplaySet = instancesAlreadyMappedIntoADisplaySet;
 
-      if (displaySet) {
-        displaySet.sopClassModule = true;
+      if (
+        displaySetsFromSopClassModule &&
+        displaySetsFromSopClassModule.length > 0
+      ) {
+        displaySetsFromSopClassModule.forEach(displaySet => {
+          displaySet.sopClassModule = true;
 
-        if (displaySet.isDerived) {
-          this._addDerivedDisplaySet(displaySet);
+          if (displaySet.isDerived) {
+            this._addDerivedDisplaySet(displaySet);
+          }
+
+          displaySets.push(displaySet);
+        });
+        /** For now, only avoid early return if video present */
+        if (!displaySets.some(ds => ds.plugin === 'video')) {
+          return displaySets;
         }
-
-        displaySets.push(displaySet);
-
-        return displaySets;
       }
     }
 
@@ -159,6 +169,10 @@ class StudyMetadata extends Metadata {
     // series into another display set.
     const stackableInstances = [];
     series.forEachInstance(instance => {
+      if (_instancesAlreadyMappedIntoADisplaySet.includes(instance)) {
+        return;
+      }
+
       // All imaging modalities must have a valid value for SOPClassUID (x00080016) or Rows (x00280010)
       if (
         !isImage(instance.getTagValue('SOPClassUID')) &&
@@ -171,7 +185,6 @@ class StudyMetadata extends Metadata {
 
       if (isMultiFrame(instance)) {
         displaySet = makeDisplaySet(series, [instance]);
-
         displaySet.setAttributes({
           sopClassUIDs,
           isClip: true,
@@ -227,7 +240,6 @@ class StudyMetadata extends Metadata {
     displaySets.map(displaySet => this._derivedDisplaySets.push(displaySet));
   }
 
-
   /**
    * Returns the source display set of the derivated display set.
    * @param {object} derivatedDisplaySet
@@ -272,10 +284,9 @@ class StudyMetadata extends Metadata {
       const referencedDisplaySet = otherDisplaySets.find(ds =>
         referencedSeriesInstanceUIDs.includes(ds.SeriesInstanceUID)
       );
-      ;
       return referencedDisplaySet;
     }
-  };
+  }
 
   /**
    * Returns a list of derived datasets in the study, filtered by the given filter.
@@ -303,7 +314,8 @@ class StudyMetadata extends Metadata {
     if (referencedSeriesInstanceUID) {
       filteredDerivedDisplaySets = filteredDerivedDisplaySets.filter(
         displaySet => {
-          return StudyMetadata.getReferencedDisplaySet(displaySet, [this]).SeriesInstanceUID === referencedSeriesInstanceUID;
+          const referencedDS = StudyMetadata.getReferencedDisplaySet(displaySet, [this]);
+          return referencedDS && referencedDS.SeriesInstanceUID === referencedSeriesInstanceUID;
         }
       );
     }
@@ -331,7 +343,7 @@ class StudyMetadata extends Metadata {
    * @param {StudyMetadata} study The study instance metadata to be used
    * @returns {Array} An array of series to be placed in the Study Metadata
    */
-  createDisplaySets(sopClassHandlerModules) {
+  async createDisplaySets(sopClassHandlerModules) {
     const displaySets = [];
     const anyDisplaySets = this.getSeriesCount();
 
@@ -340,14 +352,16 @@ class StudyMetadata extends Metadata {
     }
 
     // Loop through the series (SeriesMetadata)
-    this.forEachSeries(series => {
-      const displaySetsForSeries = this._createDisplaySetsForSeries(
+    const promises = this._series.map(async (series, index) => {
+      const displaySetsForSeries = await this._createDisplaySetsForSeries(
         sopClassHandlerModules,
         series
       );
 
       displaySetsForSeries.forEach(ds => this._insertDisplaySet(ds));
     });
+
+    await Promise.all(promises);
 
     return this._displaySets;
   }
@@ -358,12 +372,12 @@ class StudyMetadata extends Metadata {
    * @param {SeriesMetadata} series The series metadata object from which the display sets will be created
    * @returns {boolean} Returns true on success or false on failure (e.g., the series does not belong to this study)
    */
-  createAndAddDisplaySetsForSeries(sopClassHandlerModules, series) {
+  async createAndAddDisplaySetsForSeries(sopClassHandlerModules, series) {
     if (!this.containsSeries(series)) {
       return false;
     }
 
-    const displaySets = this._createDisplaySetsForSeries(
+    const displaySets = await this._createDisplaySetsForSeries(
       sopClassHandlerModules,
       series
     );
@@ -376,9 +390,7 @@ class StudyMetadata extends Metadata {
       }
     }
 
-    displaySets.forEach(displaySet => {
-      this.addDisplaySet(displaySet);
-    });
+    displaySets.forEach(displaySet => this.addDisplaySet(displaySet));
 
     return true;
   }
@@ -495,12 +507,6 @@ class StudyMetadata extends Metadata {
           }
         }
       }
-    }
-
-    if (this._displaySets.some(ds => 
-        ds.displaySetInstanceUID === displaySet.displaySetInstanceUID)
-    ) {
-      return;
     }
 
     this._displaySets.splice(insertIndex, 0, displaySet);
@@ -911,55 +917,81 @@ function getSopClassUIDs(series) {
  * @param {StudyMetadata} study
  * @param {string[]} sopClassUIDs
  */
-function _getDisplaySetFromSopClassModule(
+async function _getDisplaySetsFromSopClassModule(
   sopClassHandlerExtensions, // TODO: Update Usage
   series,
   study,
   sopClassUIDs
 ) {
-  // TODO: For now only use the plugins if all instances have the same SOPClassUID
-  if (sopClassUIDs.length !== 1) {
-    console.warn(
-      'getDisplaySetFromSopClassPlugin: More than one SOPClassUID in the same series is not yet supported.'
+  const displaySets = [];
+  const instancesAlreadyMappedIntoADisplaySet = [];
+
+  const promises = sopClassUIDs.map(async SOPClassUID => {
+    const sopClassHandlerModules = sopClassHandlerExtensions.map(extension => {
+      return extension.module;
+    });
+
+    const handlersForSopClassUID = sopClassHandlerModules.filter(module => {
+      return module.sopClassUIDs.includes(SOPClassUID);
+    });
+
+    // TODO: Sort by something, so we can determine which plugin to use
+    if (!handlersForSopClassUID || !handlersForSopClassUID.length) {
+      return;
+    }
+
+    const plugin = handlersForSopClassUID[0];
+    const headers = DICOMWeb.getAuthorizationHeader();
+    const errorInterceptor = errorHandler.getHTTPErrorHandler();
+    const dicomWebClient = new dwc({
+      url: study.getData().wadoRoot,
+      headers,
+      errorInterceptor,
+      requestHooks: [getXHRRetryRequestHook()],
+    });
+
+    const onAddDisplaySet = displaySet => {
+      if (
+        instancesAlreadyMappedIntoADisplaySet.includes(
+          displaySet.referenceInstance
+        )
+      ) {
+        return;
+      }
+
+      displaySets.push(displaySet);
+      instancesAlreadyMappedIntoADisplaySet.push(displaySet.referenceInstance);
+    };
+
+    const displaySet = await plugin.getDisplaySetFromSeries(
+      series,
+      study,
+      dicomWebClient,
+      headers,
+      onAddDisplaySet,
+      null
     );
-    return;
-  }
 
-  const SOPClassUID = sopClassUIDs[0];
-  const sopClassHandlerModules = sopClassHandlerExtensions.map(extension => {
-    return extension.module;
+    if (displaySet && !displaySet.Modality) {
+      const instance = series.getFirstInstance();
+      displaySet.Modality = instance.getTagValue('Modality');
+    }
+
+    if (displaySet) {
+      displaySets.push(displaySet);
+    }
+
+    if (displaySet && displaySet.referenceInstance) {
+      instancesAlreadyMappedIntoADisplaySet.push(displaySet.referenceInstance);
+    }
   });
 
-  const handlersForSopClassUID = sopClassHandlerModules.filter(module => {
-    return module.sopClassUIDs.includes(SOPClassUID);
-  });
+  await Promise.all(promises);
 
-  // TODO: Sort by something, so we can determine which plugin to use
-  if (!handlersForSopClassUID || !handlersForSopClassUID.length) {
-    return;
-  }
-
-  const plugin = handlersForSopClassUID[0];
-  const headers = DICOMWeb.getAuthorizationHeader();
-  const errorInterceptor = errorHandler.getHTTPErrorHandler();
-  const dicomWebClient = new dwc({
-    url: study.getData().wadoRoot,
-    headers,
-    errorInterceptor,
-    requestHooks: [getXHRRetryRequestHook()],
-  });
-
-  let displaySet = plugin.getDisplaySetFromSeries(
-    series,
-    study,
-    dicomWebClient,
-    headers
-  );
-  if (displaySet && !displaySet.Modality) {
-    const instance = series.getFirstInstance();
-    displaySet.Modality = instance.getTagValue('Modality');
-  }
-  return displaySet;
+  return {
+    displaySets,
+    instancesAlreadyMappedIntoADisplaySet,
+  };
 }
 
 /**

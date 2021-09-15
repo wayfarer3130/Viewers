@@ -3,6 +3,7 @@ import handleSingleMeasurementAdded from './handleSingleMeasurementAdded';
 import handleChildMeasurementAdded from './handleChildMeasurementAdded';
 import handleSingleMeasurementModified from './handleSingleMeasurementModified';
 import handleChildMeasurementModified from './handleChildMeasurementModified';
+import handleMultipleMeasurementsModified from './handleMultipleMeasurementsModified';
 import handleSingleMeasurementRemoved from './handleSingleMeasurementRemoved';
 import handleChildMeasurementRemoved from './handleChildMeasurementRemoved';
 
@@ -22,6 +23,7 @@ const MeasurementHandlers = {
   handleChildMeasurementModified,
   handleSingleMeasurementRemoved,
   handleChildMeasurementRemoved,
+  handleMultipleMeasurementsModified,
 
   onAdded(event) {
     const eventData = getEventData(event);
@@ -49,6 +51,12 @@ const MeasurementHandlers = {
 
   onModified(event) {
     const eventData = getEventData(event);
+
+    // call batch operation
+    if(eventData.batch) {
+      return handleMultipleMeasurementsModified(eventData);
+    }
+
     const { toolType } = eventData;
     const {
       toolGroupId,

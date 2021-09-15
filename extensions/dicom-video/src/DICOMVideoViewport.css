@@ -1,0 +1,20 @@
+.DICOMVideoViewport {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+}
+
+.DICOMVideoViewport .error {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--active-color);
+  font-size: 18px;
+}
+
+.DICOMVideoViewport video {
+  height: 100%;
+  width: 100%;
+}

@@ -61,12 +61,12 @@ class ViewerLocalFileData extends Component {
     error: null,
   };
 
-  updateStudies = studies => {
+  updateStudies = async studies => {
     // Render the viewer when the data is ready
     studyMetadataManager.purge();
 
     // Map studies to new format, update metadata manager?
-    const updatedStudies = studies.map(study => {
+    let updatedStudies = studies.map(async study => {
       const studyMetadata = new OHIFStudyMetadata(
         study,
         study.StudyInstanceUID
@@ -76,7 +76,7 @@ class ViewerLocalFileData extends Component {
 
       study.displaySets =
         study.displaySets ||
-        studyMetadata.createDisplaySets(sopClassHandlerModules);
+        (await studyMetadata.createDisplaySets(sopClassHandlerModules));
 
       studyMetadata.forEachDisplaySet(displayset => {
         displayset.localFile = true;
@@ -86,6 +86,8 @@ class ViewerLocalFileData extends Component {
 
       return study;
     });
+
+    updatedStudies = await Promise.all(updatedStudies);
 
     this.setState({
       studies: updatedStudies,
@@ -97,7 +99,7 @@ class ViewerLocalFileData extends Component {
       this.setState({ loading: true });
 
       const studies = await filesToStudies(acceptedFiles);
-      const updatedStudies = this.updateStudies(studies);
+      const updatedStudies = await this.updateStudies(studies);
 
       if (!updatedStudies) {
         return;

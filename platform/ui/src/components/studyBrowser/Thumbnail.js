@@ -1,36 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useDrag } from 'react-dnd';
-import { classes } from '@ohif/core';
 import ImageThumbnail from './ImageThumbnail';
 import classNames from 'classnames';
 import { Icon } from './../../elements/Icon';
 import { Tooltip } from './../tooltip';
 import { OverlayTrigger } from './../overlayTrigger';
-import './Thumbnail.styl';
 
-const StudyLoadingListener = classes.StudyLoadingListener;
+import './Thumbnail.styl';
 
 function ThumbnailFooter({
   SeriesDescription,
   SeriesNumber,
   InstanceNumber,
   numImageFrames,
-  hasWarnings,
+  hasWarnings
 }) {
   const [inconsistencyWarnings, inconsistencyWarningsSet] = useState([]);
 
   useEffect(() => {
-    let unmounted = false;
+    let unmounted = false
     hasWarnings.then(response => {
       if (!unmounted) {
-        inconsistencyWarningsSet(response);
+        inconsistencyWarningsSet(response)
       }
-    });
+    })
     return () => {
-      unmounted = true;
-    };
-  }, [hasWarnings]);
+      unmounted = true
+    }
+  }, [])
 
   const infoOnly = !SeriesDescription;
 
@@ -43,7 +41,7 @@ function ThumbnailFooter({
     );
   };
 
-  const getWarningContent = inconsistencyWarnings => {
+  const getWarningContent = (inconsistencyWarnings) => {
     if (Array.isArray(inconsistencyWarnings)) {
       const listedWarnings = inconsistencyWarnings.map((warn, index) => {
         return <li key={index}>{warn}</li>;
@@ -56,8 +54,8 @@ function ThumbnailFooter({
   };
 
   const getWarningInfo = (SeriesNumber, inconsistencyWarnings) => {
-    return (
-      <React.Fragment>
+      return(
+        <React.Fragment>
         {inconsistencyWarnings && inconsistencyWarnings.length != 0 ? (
           <OverlayTrigger
             key={SeriesNumber}
@@ -69,9 +67,7 @@ function ThumbnailFooter({
                 id="tooltip-left"
               >
                 <div className="warningTitle">Series Inconsistencies</div>
-                <div className="warningContent">
-                  {getWarningContent(inconsistencyWarnings)}
-                </div>
+                <div className="warningContent">{getWarningContent(inconsistencyWarnings)}</div>
               </Tooltip>
             }
           >
@@ -83,9 +79,9 @@ function ThumbnailFooter({
           </OverlayTrigger>
         ) : (
           <React.Fragment></React.Fragment>
-        )}
+          )}
       </React.Fragment>
-    );
+      );
   };
   const getSeriesInformation = (
     SeriesNumber,
@@ -96,27 +92,21 @@ function ThumbnailFooter({
     if (!SeriesNumber && !InstanceNumber && !numImageFrames) {
       return;
     }
-    const seriesInformation = (
+    const seriesInformation =
       <div className="series-information">
         {getInfo(SeriesNumber, 'S:')}
         {getInfo(InstanceNumber, 'I:')}
         {getInfo(numImageFrames, '', 'image-frames')}
         {getWarningInfo(SeriesNumber, inconsistencyWarnings)}
       </div>
-    );
 
-    return seriesInformation;
+    return (seriesInformation);
   };
 
   return (
     <div className={classNames('series-details', { 'info-only': infoOnly })}>
       <div className="series-description">{SeriesDescription}</div>
-      {getSeriesInformation(
-        SeriesNumber,
-        InstanceNumber,
-        numImageFrames,
-        inconsistencyWarnings
-      )}
+      {getSeriesInformation(SeriesNumber, InstanceNumber, numImageFrames, inconsistencyWarnings)}
     </div>
   );
 }
@@ -134,36 +124,13 @@ function Thumbnail(props) {
     SeriesDescription,
     SeriesNumber,
     hasWarnings,
+    stackPercentComplete,
     StudyInstanceUID,
     onClick,
     onDoubleClick,
     onMouseDown,
     supportsDrag,
-    showProgressBar,
   } = props;
-
-  const [stackPercentComplete, setStackPercentComplete] = useState(0);
-  useEffect(() => {
-    const onProgressChange = ({ detail }) => {
-      const { progressId, progressData } = detail;
-      if (`StackProgress:${displaySetInstanceUID}` === progressId) {
-        const percent = progressData ? progressData.percentComplete : 0;
-        setStackPercentComplete(percent);
-      }
-    };
-
-    document.addEventListener(
-      StudyLoadingListener.events.OnProgress,
-      onProgressChange
-    );
-
-    return () => {
-      document.removeEventListener(
-        StudyLoadingListener.events.OnProgress,
-        onProgressChange
-      );
-    };
-  }, [displaySetInstanceUID]);
 
   const [collectedProps, drag, dragPreview] = useDrag({
     // `droppedItem` in `dropTarget`
@@ -184,7 +151,7 @@ function Thumbnail(props) {
   return (
     <div
       ref={drag}
-      className={classNames('thumbnail', { active: active })}
+      className={classNames('thumbnail', { active })}
       onClick={onClick}
       onDoubleClick={onDoubleClick}
       onMouseDown={onMouseDown}
@@ -197,7 +164,6 @@ function Thumbnail(props) {
           imageId={imageId}
           error={error}
           stackPercentComplete={stackPercentComplete}
-          showProgressBar={showProgressBar}
         />
       )}
       {/* SHOW TEXT ALTERNATIVE */}
@@ -237,7 +203,6 @@ Thumbnail.propTypes = {
   onDoubleClick: PropTypes.func,
   onClick: PropTypes.func,
   onMouseDown: PropTypes.func,
-  showProgressBar: PropTypes.bool,
 };
 
 Thumbnail.defaultProps = {

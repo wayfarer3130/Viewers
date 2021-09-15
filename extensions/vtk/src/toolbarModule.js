@@ -40,10 +40,11 @@ const definitions = [
     label: 'Rotate',
     icon: '3d-rotate',
     //
-    type: TOOLBAR_BUTTON_TYPES.SET_TOOL_ACTIVE,
-    commandName: 'enableRotateTool',
+    type: TOOLBAR_BUTTON_TYPES.COMMAND,
+    commandName: 'resetMPRView',
     commandOptions: {},
   },
+
   */
   /*
   {

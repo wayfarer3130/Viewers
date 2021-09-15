@@ -1,4 +1,6 @@
 import React from 'react';
+import { MODULE_TYPES } from '@ohif/core';
+
 import init from './init.js';
 import commandsModule from './commandsModule.js';
 import toolbarModule from './toolbarModule.js';
@@ -36,8 +38,14 @@ export default {
   preRegistration({ servicesManager, configuration = {} }) {
     init({ servicesManager, configuration });
   },
-  getViewportModule({ commandsManager, appConfig }) {
+  getViewportModule({ commandsManager, extensionManager }) {
     const ExtendedOHIFCornerstoneViewport = props => {
+      const viewportOverlayModules =
+        extensionManager.modules[MODULE_TYPES.VIEWPORT_OVERLAY];
+      const cornerstoneViewportModule = viewportOverlayModules.find(
+        vm => vm.module.plugin === 'cornerstone'
+      );
+
       /**
        * TODO: This appears to be used to set the redux parameters for
        * the viewport when new images are loaded. It's very ugly
@@ -49,15 +57,11 @@ export default {
         commandsManager.runCommand('jumpToImage', jumpData);
       };
 
-      const { studyPrefetcher } = appConfig;
-      const isStackPrefetchEnabled =
-        studyPrefetcher && !studyPrefetcher.enabled;
-
       return (
         <OHIFCornerstoneViewport
           {...props}
           onNewImage={onNewImageHandler}
-          isStackPrefetchEnabled={isStackPrefetchEnabled}
+          viewportOverlayComponent={cornerstoneViewportModule.module.component}
         />
       );
     };

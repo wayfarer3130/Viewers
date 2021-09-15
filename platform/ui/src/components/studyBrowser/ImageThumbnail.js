@@ -2,8 +2,8 @@
 import './ImageThumbnail.styl';
 
 import { utils } from '@ohif/core';
-import React, { useState, useEffect, createRef, useCallback } from 'react';
 import classNames from 'classnames';
+import React, { useState, useEffect, createRef } from 'react';
 
 import PropTypes from 'prop-types';
 import ViewportErrorIndicator from '../../viewer/ViewportErrorIndicator';
@@ -23,7 +23,6 @@ function ImageThumbnail(props) {
     imageId,
     stackPercentComplete,
     error: propsError,
-    showProgressBar,
   } = props;
 
   const [isLoading, setLoading] = useState(false);
@@ -40,8 +39,7 @@ function ImageThumbnail(props) {
     loadingOrError = <ViewportLoadingIndicator />;
   }
 
-  const showStackLoadingProgressBar =
-    showProgressBar && stackPercentComplete !== undefined;
+  const showStackLoadingProgressBar = stackPercentComplete !== undefined;
 
   const shouldRenderToCanvas = () => {
     return imageId && !imageSrc;
@@ -59,8 +57,8 @@ function ImageThumbnail(props) {
       })
       .catch(error => {
         if (error.isCanceled) return;
-        setLoading(false);
-        setError(true);
+        // setLoading(false);
+        // setError(true);
         throw new Error(error);
       });
   };
@@ -73,11 +71,11 @@ function ImageThumbnail(props) {
     }
   };
 
-  const purgeCancelablePromise = useCallback(() => {
+  const purgeCancelablePromise = () => {
     if (cancelablePromise) {
       cancelablePromise.cancel();
     }
-  });
+  };
 
   useEffect(() => {
     return () => {
@@ -143,7 +141,6 @@ ImageThumbnail.propTypes = {
   width: PropTypes.number,
   height: PropTypes.number,
   stackPercentComplete: PropTypes.number.isRequired,
-  showProgressBar: PropTypes.bool,
 };
 
 ImageThumbnail.defaultProps = {
@@ -152,7 +149,6 @@ ImageThumbnail.defaultProps = {
   stackPercentComplete: 0,
   width: 217,
   height: 123,
-  showProgressBar: true,
 };
 
 export default ImageThumbnail;

@@ -11,6 +11,7 @@ import setMPRLayout from './utils/setMPRLayout.js';
 import setViewportToVTK from './utils/setViewportToVTK.js';
 import Constants from 'vtk.js/Sources/Rendering/Core/VolumeMapper/Constants.js';
 import OHIFVTKViewport from './OHIFVTKViewport';
+import getVolumeOrientations from './utils/getVolumeOrientations.js';
 
 const { BlendMode } = Constants;
 
@@ -19,6 +20,7 @@ const commandsModule = ({ commandsManager, servicesManager }) => {
 
   // TODO: Put this somewhere else
   let apis = {};
+  let defaultApiOrientations = [];
   let defaultVOI;
 
   async function _getActiveViewportVTKApi(viewports) {
@@ -68,8 +70,18 @@ const commandsModule = ({ commandsManager, servicesManager }) => {
   }
 
   function getVOIFromCornerstoneViewport() {
-    const dom = commandsManager.runCommand('getActiveViewportEnabledElement');
-    const cornerstoneElement = cornerstone.getEnabledElement(dom);
+    let cornerstoneElement;
+
+    try {
+      const dom = commandsManager.runCommand(
+        'getActiveViewportEnabledElement',
+        {},
+        'ACTIVE_VIEWPORT::CORNERSTONE'
+      );
+      cornerstoneElement = cornerstone.getEnabledElement(dom);
+    } catch {
+      return;
+    }
 
     if (cornerstoneElement) {
       const imageId = cornerstoneElement.image.imageId;
@@ -118,6 +130,21 @@ const commandsModule = ({ commandsManager, servicesManager }) => {
   };
 
   const actions = {
+    resetMPRView() {
+      apis.forEach(api => {
+        api.resetOrientation();
+      });
+
+      // Reset based on volume
+      apis.forEach((api, apiIndex) => {
+        const { sliceNormal, viewUp } = defaultApiOrientations[apiIndex];
+
+        api.setOrientation(sliceNormal, viewUp);
+      });
+
+      // Reset the crosshairs
+      apis[0].svgWidgets.rotatableCrosshairsWidget.resetCrosshairs(apis, 0);
+    },
     getVtkApis: ({ index }) => {
       return apis[index];
     },
@@ -291,6 +318,7 @@ const commandsModule = ({ commandsManager, servicesManager }) => {
             apis,
             apiIndex,
             uid: api.uid,
+            disableNormalMPRScroll: true,
           },
         });
       });
@@ -385,12 +413,20 @@ const commandsModule = ({ commandsManager, servicesManager }) => {
         renderWindow.render();
       });
     },
-    mpr2d: async ({ viewports }) => {
+    mpr2d: async ({ viewports, viewportIndexToUse }) => {
       // TODO push a lot of this backdoor logic lower down to the library level.
-      const displaySet =
-        viewports.viewportSpecificData[viewports.activeViewportIndex];
+
+      const viewportIndex =
+        viewportIndexToUse !== undefined
+          ? viewportIndexToUse
+          : viewports.activeViewportIndex;
+
+      const displaySet = viewports.viewportSpecificData[viewportIndex];
+
+      defaultApiOrientations = getVolumeOrientations(displaySet);
 
       // Get current VOI if cornerstone viewport.
+
       const cornerstoneVOI = getVOIFromCornerstoneViewport();
       defaultVOI = cornerstoneVOI;
 
@@ -401,6 +437,7 @@ const commandsModule = ({ commandsManager, servicesManager }) => {
             sliceNormal: [0, 0, 1],
             viewUp: [0, -1, 0],
           },
+          showRotation: true,
         },
         {
           // Sagittal
@@ -408,6 +445,7 @@ const commandsModule = ({ commandsManager, servicesManager }) => {
             sliceNormal: [1, 0, 0],
             viewUp: [0, 0, 1],
           },
+          showRotation: true,
         },
         {
           // Coronal
@@ -415,6 +453,7 @@ const commandsModule = ({ commandsManager, servicesManager }) => {
             sliceNormal: [0, 1, 0],
             viewUp: [0, 0, 1],
           },
+          showRotation: true,
         },
       ];
 
@@ -440,11 +479,26 @@ const commandsModule = ({ commandsManager, servicesManager }) => {
 
         api.setInteractorStyle({
           istyle,
-          configuration: { apis, apiIndex, uid },
+          configuration: {
+            apis,
+            apiIndex,
+            uid,
+            disableNormalMPRScroll: true,
+          },
         });
+
+        const { sliceNormal, viewUp } = defaultApiOrientations[apiIndex];
+
+        api.setOrientation(sliceNormal, viewUp);
 
         api.svgWidgets.rotatableCrosshairsWidget.setApiIndex(apiIndex);
         api.svgWidgets.rotatableCrosshairsWidget.setApis(apis);
+
+        // Make sure camera axis are orthogonal
+        api.genericRenderWindow
+          .getRenderer()
+          .getActiveCamera()
+          .orthogonalizeViewUp();
       });
 
       const firstApi = apis[0];
@@ -525,10 +579,6 @@ const commandsModule = ({ commandsManager, servicesManager }) => {
     sagittal: {
       commandFn: actions.sagittal,
       storeContexts: ['viewports'],
-      options: {},
-    },
-    enableRotateTool: {
-      commandFn: actions.enableRotateTool,
       options: {},
     },
     enableCrosshairsTool: {
