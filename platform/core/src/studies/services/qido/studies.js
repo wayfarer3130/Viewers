@@ -118,11 +118,11 @@ function resultDataToStudies(resultData) {
 export default function Studies(server, filter) {
   const { staticWado } = server;
   const config = {
+    ...server,
     url: server.qidoRoot,
     headers: DICOMWeb.getAuthorizationHeader(server),
     errorInterceptor: errorHandler.getHTTPErrorHandler(),
     requestHooks: [getXHRRetryRequestHook()],
-    staticWado,
   };
 
   const dicomWeb = staticWado

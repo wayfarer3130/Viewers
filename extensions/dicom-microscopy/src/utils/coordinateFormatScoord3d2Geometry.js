@@ -38,6 +38,7 @@ export default function coordinateFormatScoord3d2Geometry(
 }
 
 function _getPixelSpacing(metadata) {
+  if (metadata.PixelSpacing) return metadata.PixelSpacing;
   const functionalGroup = metadata.SharedFunctionalGroupsSequence[0];
   const pixelMeasures = functionalGroup.PixelMeasuresSequence[0];
   return pixelMeasures.PixelSpacing;

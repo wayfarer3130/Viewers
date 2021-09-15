@@ -34,6 +34,16 @@ const DICOMVideoViewport = ({
       try {
         setState(state => ({ ...state, isLoading: true }));
         const { displaySet } = viewportData;
+        const { videoUrl } = displaySet;
+        if (videoUrl) {
+          setState(state => ({
+            ...state,
+            src: videoUrl,
+            isLoading: false,
+            errorMessage: null,
+          }));
+          return;
+        }
 
         let imageUrl = displaySet.localFile
           ? displaySet.imageId
@@ -89,7 +99,7 @@ const DICOMVideoViewport = ({
       }
     };
     loadVideo();
-  }, []);
+  }, [viewportData]);
 
   const onViewportClickHandler = () => setViewportActive(viewportIndex);
 

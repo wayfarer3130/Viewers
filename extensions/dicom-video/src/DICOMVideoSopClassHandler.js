@@ -28,9 +28,33 @@ const SupportedTransferSyntaxes = {
 
 const supportedTransferSyntaxUIDs = Object.values(SupportedTransferSyntaxes);
 
+function generateVideoUrl(baseWadoRsUri, metadata) {
+  const { StudyInstanceUID } = metadata;
+  // If the BulkDataURI isn't present, then assume it uses the pixeldata endpoint
+  // The standard isn't quite clear on that, but appears to be what is expected
+  const BulkDataURI = metadata.PixelData && metadata.PixelData.BulkDataURI 
+     || `series/${metadata.SeriesInstanceUID}/instances/${metadata.SOPInstanceUID}/pixeldata`;
+  const hasQuery = BulkDataURI.indexOf('?') != -1;
+  const hasAccept = BulkDataURI.indexOf('accept=') != -1;
+  const wadoRoot = baseWadoRsUri.substring(
+    0,
+    baseWadoRsUri.indexOf('/studies')
+  );
+  const acceptUri =
+    BulkDataURI +
+    (hasAccept ? '' : ((hasQuery ? '&' : '?') + 'accept=video/mp4'));
+  if (BulkDataURI.indexOf('http') == 0) return acceptUri;
+  if (BulkDataURI.indexOf('/') == 0) return wadoRoot + acceptUri;
+  if (BulkDataURI.indexOf('series/') == 0) {
+    return `${wadoRoot}/studies/${StudyInstanceUID}/${acceptUri}`;
+  }
+  throw new Error('BulkDataURI in unknown format:' + BulkDataURI);
+}
+
 const DICOMVideoSopClassHandler = {
   id: 'DICOMVideoSopClassHandlerPlugin',
   sopClassUIDs,
+
   getDisplaySetFromSeries: async function getDisplaySetFromSeries(
     series,
     study,
@@ -41,7 +65,11 @@ const DICOMVideoSopClassHandler = {
   ) {
     const instance = series.getFirstInstance();
 
-    const { wadouri, metadata: naturalizedDataset } = instance.getData();
+    const {
+      wadouri,
+      metadata: naturalizedDataset,
+      baseWadoRsUri,
+    } = instance.getData();
 
     const {
       FrameOfReferenceUID,
@@ -91,7 +119,35 @@ const DICOMVideoSopClassHandler = {
       await generateDisplaySetsForRemainingVideoInstances();
     }
 
+    const instanceMetadata = instance.getData().metadata;
+    const { AvailableTransferSyntaxUID } = instanceMetadata;
+    if (AvailableTransferSyntaxUID) {
+      console.log('AvailableTransferSyntaxUID', AvailableTransferSyntaxUID);
+      if (!supportedTransferSyntaxUIDs.includes(AvailableTransferSyntaxUID)) {
+        return;
+      }
+      return {
+        plugin: 'video',
+        Modality,
+        displaySetInstanceUID: utils.guid(),
+        dicomWebClient,
+        SOPInstanceUID,
+        SeriesInstanceUID: series.getSeriesInstanceUID(),
+        StudyInstanceUID: study.getStudyInstanceUID(),
+        referenceInstance: instance,
+        videoUrl: generateVideoUrl(baseWadoRsUri, instanceMetadata),
+        imageId: naturalizedDataset.imageId,
+        FrameOfReferenceUID,
+        metadata: naturalizedDataset,
+        SeriesDescription,
+        SeriesDate: ContentDate,
+        SeriesTime: ContentTime,
+        SeriesNumber,
+      };
+    }
+
     const url = wadouri.replace('dicomweb', 'https');
+    console.log('Requesting video file', url);
     const {
       src,
       type,

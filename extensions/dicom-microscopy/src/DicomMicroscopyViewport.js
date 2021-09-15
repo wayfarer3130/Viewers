@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import ReactResizeDetector from 'react-resize-detector';
 import PropTypes from 'prop-types';
 import debounce from 'lodash.debounce';
+import dcmjs from 'dcmjs';
 
 import microscopyManager from './tools/microscopyManager';
 import ViewportOverlay from './components/ViewportOverlay/ViewportOverlay';
@@ -35,7 +36,12 @@ class DicomMicroscopyViewport extends Component {
   // install the microscopy renderer into the web page.
   // you should only do this once.
   installOpenLayersRenderer(container, displaySet) {
-    const { dicomWebClient, StudyInstanceUID, SeriesInstanceUID } = displaySet;
+    const {
+      dicomWebClient,
+      StudyInstanceUID,
+      SeriesInstanceUID,
+      series,
+    } = displaySet;
 
     const searchInstanceOptions = {
       studyInstanceUID: StudyInstanceUID,
@@ -46,6 +52,13 @@ class DicomMicroscopyViewport extends Component {
       const promises = [];
       for (let i = 0; i < instances.length; i++) {
         const sopInstanceUID = instances[i]['00080018']['Value'][0];
+        const loadedInstance =
+          series && series.getInstanceByUID(sopInstanceUID);
+        if (loadedInstance) {
+          const { metadata } = loadedInstance.getData();
+          promises.push(Promise.resolve(metadata));
+          continue;
+        }
 
         const retrieveInstanceOptions = {
           studyInstanceUID: StudyInstanceUID,
@@ -56,9 +69,12 @@ class DicomMicroscopyViewport extends Component {
         const promise = dicomWebClient
           .retrieveInstanceMetadata(retrieveInstanceOptions)
           .then(metadata => {
-            const ImageType = metadata[0]['00080008']['Value'];
+            const metadataZero = metadata[0];
+            const ImageType = metadataZero['00080008']['Value'];
             if (ImageType[2] === 'VOLUME') {
-              return metadata[0];
+              return dcmjs.data.DicomMetaDictionary.naturalizeDataset(
+                metadataZero
+              );
             }
           });
         promises.push(promise);
@@ -83,7 +99,11 @@ class DicomMicroscopyViewport extends Component {
 
       this.viewer = new microscopyViewer(options);
 
-      if (this.overlayElement && this.overlayElement.current) {
+      if (
+        this.overlayElement &&
+        this.overlayElement.current &&
+        this.viewer.addViewportOverlay
+      ) {
         this.viewer.addViewportOverlay({
           element: this.overlayElement.current,
           className: 'OpenLayersOverlay',

@@ -37,6 +37,7 @@ const DicomMicroscopySopClassHandler = {
       SeriesDate: ContentDate, // Map ContentDate/Time to SeriesTime for series list sorting.
       SeriesTime: ContentTime,
       SeriesNumber,
+      series,
     };
   },
 };

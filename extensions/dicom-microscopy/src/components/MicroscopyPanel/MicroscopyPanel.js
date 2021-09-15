@@ -136,6 +136,13 @@ class MicroscopyPanel extends Component {
     const SeriesNumber = maxSeriesNumber + 1;
 
     const { metadata } = smDisplaySet;
+    // Handle malformed data
+    if (!metadata.SpecimenDescriptionSequence) {
+      metadata.SpecimenDescriptionSequence = {
+        SpecimenUID: metadata.SeriesInstanceUID,
+        SpecimenIdentifier: metadata.SeriesDescription,
+      };
+    }
     const { SpecimenDescriptionSequence } = metadata;
 
     const observationContext = new dcmjs.sr.templates.ObservationContext({

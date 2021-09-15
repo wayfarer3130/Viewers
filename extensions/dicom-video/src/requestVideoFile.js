@@ -11,12 +11,14 @@ const requestVideoFile = ({ url, triggerDownload = false }) =>
       const TransferSyntaxUIDTag = '00020010';
       xhr.open('GET', `${url}&includefield=${TransferSyntaxUIDTag}`, true);
       xhr.responseType = 'arraybuffer';
-      xhr.withCredentials = true;
       const token = OHIF.user.getAccessToken();
       if (token) {
+        console.log('Video request with token', token);
+        xhr.withCredentials = true;
         xhr.setRequestHeader('Authorization', token);
       }
       xhr.onload = async function(e) {
+        console.log('Loaded', url, 'status', this.status);
         if (this.status == 200) {
           const dicomData = DicomMessage.readFile(this.response);
           const dataset = DicomMetaDictionary.naturalizeDataset(dicomData.dict);
@@ -48,7 +50,11 @@ const requestVideoFile = ({ url, triggerDownload = false }) =>
           }
         }
       };
-      xhr.onerror = error => reject(error);
+      xhr.onerror = error => {
+        console.log('Got error', error, 'on', url);
+        //reject(error);
+        resolve({});
+      };
       xhr.send();
     } catch (error) {
       reject(error);

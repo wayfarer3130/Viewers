@@ -48,17 +48,23 @@ function makeSeriesAsyncLoader(
   dicomWebClient,
   studyInstanceUID,
   seriesInstanceUIDList,
-  seriesInstanceUIDs = [],
+  seriesInstanceUIDs = []
 ) {
   return Object.freeze({
     hasNext() {
       return seriesInstanceUIDList.length > 0;
     },
     async next() {
-      let seriesInstanceUID = seriesInstanceUIDs.length > 0 && seriesInstanceUIDs.shift();
+      let seriesInstanceUID =
+        seriesInstanceUIDs.length > 0 && seriesInstanceUIDs.shift();
 
-      if (seriesInstanceUID && seriesInstanceUIDList.includes(seriesInstanceUID)) {
-        seriesInstanceUIDList = seriesInstanceUIDList.filter(uid => uid !== seriesInstanceUID);
+      if (
+        seriesInstanceUID &&
+        seriesInstanceUIDList.includes(seriesInstanceUID)
+      ) {
+        seriesInstanceUIDList = seriesInstanceUIDList.filter(
+          uid => uid !== seriesInstanceUID
+        );
       } else {
         seriesInstanceUID = seriesInstanceUIDList.shift();
       }
@@ -67,6 +73,7 @@ function makeSeriesAsyncLoader(
         studyInstanceUID,
         seriesInstanceUID,
       });
+      console.log('makeSerisAsyncLoader', sopInstances);
       return { studyInstanceUID, seriesInstanceUID, sopInstances };
     },
   });
@@ -142,7 +149,7 @@ export default class RetrieveMetadataLoaderAsync extends RetrieveMetadataLoader 
       client,
       studyInstanceUID,
       preLoadData.seriesInstanceUIDsMap,
-      [...this.filters.seriesInstanceUIDs],
+      [...this.filters.seriesInstanceUIDs]
     );
 
     const firstSeries = await seriesAsyncLoader.next();

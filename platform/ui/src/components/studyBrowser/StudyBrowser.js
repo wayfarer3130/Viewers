@@ -83,7 +83,7 @@ StudyBrowser.propTypes = {
           altImageText: PropTypes.string,
           displaySetInstanceUID: PropTypes.string.isRequired,
           imageId: PropTypes.string,
-          InstanceNumber: PropTypes.number,
+          InstanceNumber: PropTypes.any,
           numImageFrames: PropTypes.number,
           SeriesDescription: PropTypes.string,
           SeriesNumber: PropTypes.oneOfType([
