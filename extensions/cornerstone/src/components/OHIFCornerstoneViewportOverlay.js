@@ -54,7 +54,15 @@ class OHIFCornerstoneViewportOverlay extends PureComponent {
 
     const patientModule =
       cornerstone.metaData.get('patientModule', imageId) || {};
-    const { patientId, patientName } = patientModule;
+    const {
+      patientId,
+      patientName,
+      patientSex,
+      patientBirthDate,
+      otherpatientIds,
+      patientSpeciesDescription,
+      patientBreedDescription,
+    } = patientModule;
 
     const generalImageModule =
       cornerstone.metaData.get('generalImageModule', imageId) || {};
@@ -119,8 +127,19 @@ class OHIFCornerstoneViewportOverlay extends PureComponent {
     const normal = (
       <React.Fragment>
         <div className="top-left overlay-element">
-          <div>{formatPN(patientName)}</div>
-          <div>{patientId}</div>
+          <div title="Patient Name and (Sex)">
+            {formatPN(patientName)}{' '}
+            {patientSex && `(${patientSex})`}
+          </div>
+          <div title="Patient Species and (Breed)">
+            {patientSpeciesDescription}{' '}
+            {patientBreedDescription && `(${patientBreedDescription})`}
+          </div>
+          <div title="Patient ID">{patientId}</div>
+          <div title="Patient Birthday">
+            {formatDICOMDate(patientBirthDate)}
+          </div>
+          <div title="Other Patient IDs">{otherpatientIds}</div>
         </div>
         <div className="top-right overlay-element">
           <div>{studyDescription}</div>
@@ -132,9 +151,6 @@ class OHIFCornerstoneViewportOverlay extends PureComponent {
           <div>Zoom: {zoomPercentage}%</div>
           <div>{wwwc}</div>
           <div className="compressionIndicator">{compression}</div>
-        </div>
-        <div className="bottom-left2 warning">
-          <div>{inconsistencyWarningsOn ? getWarningInfo(seriesNumber, inconsistencyWarnings) : ''}</div>
         </div>
         <div className="bottom-left overlay-element">
           <div>{seriesNumber >= 0 ? `Ser: ${seriesNumber}` : ''}</div>
