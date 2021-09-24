@@ -89,6 +89,7 @@ const DICOMVideoSopClassHandler = {
           referenceInstance: instance,
           videoUrl: generateVideoUrl(baseWadoRsUri, metadata),
           others: [instance],
+          thumbnailSrc: baseWadoRsUri + '/thumbnail',
           imageId: metadata.imageId,
           FrameOfReferenceUID,
           metadata,

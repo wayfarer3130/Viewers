@@ -348,15 +348,16 @@ function ViewerRetrieveStudyData({
               study.displaySets.length > 0
             ) {
               // When we are loading synchronously result will come undefined
-              if (seriesInstanceUID && sopInstanceUID) {
+              if (sopInstanceUID) {
                 study.displaySets.forEach(displaySet => {
-                  if (displaySet.SeriesInstanceUID === seriesInstanceUID) {
+                  if (!seriesInstanceUID || !displaySet.SeriesInstanceUID || displaySet.SeriesInstanceUID === seriesInstanceUID) {
                     const frameIndex = _findSOPInstanceUIDFrame(
                       displaySet,
                       sopInstanceUID
                     );
-
-                    setFirstViewportSpecificData({ ...displaySet, frameIndex });
+                    if (frameIndex !== undefined) {
+                      setFirstViewportSpecificData({ ...displaySet, frameIndex });
+                    }
                   }
                 });
               }
