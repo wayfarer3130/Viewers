@@ -662,10 +662,11 @@ const _mapStudiesToThumbnails = function(studies, activeDisplaySetInstanceUID) {
         InstanceNumber,
         numImageFrames,
         SeriesNumber,
+        thumbnailSrc,
       } = displaySet;
 
       let imageId;
-      let altImageText;
+      let altImageText = displaySet.Modality || 'UN';
 
       if (displaySet.Modality && displaySet.Modality === 'SEG') {
         // TODO: We want to replace this with a thumbnail showing
@@ -675,8 +676,6 @@ const _mapStudiesToThumbnails = function(studies, activeDisplaySetInstanceUID) {
       } else if (displaySet.images && displaySet.images.length) {
         const imageIndex = Math.floor(displaySet.images.length / 2);
         imageId = displaySet.images[imageIndex].getImageId();
-      } else {
-        altImageText = displaySet.Modality ? displaySet.Modality : 'UN';
       }
 
       const hasWarnings = _checkForSeriesInconsistencesWarnings(
@@ -692,6 +691,7 @@ const _mapStudiesToThumbnails = function(studies, activeDisplaySetInstanceUID) {
       return {
         active,
         imageId,
+        imageSrc: thumbnailSrc,
         altImageText,
         displaySetInstanceUID,
         SeriesDescription,

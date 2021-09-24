@@ -19,6 +19,26 @@ export default class StaticWadoClient extends api.DICOMwebClient {
   constructor(qidoConfig) {
     super(qidoConfig);
     this.staticWado = qidoConfig.staticWado;
+    this.extendMetadataWithInstances = qidoConfig.extendMetadataWithInstances;
+  }
+
+  async retrieveSeriesMetadata(options) {
+    if (!this.extendMetadataWithInstances)
+      return super.retrieveSeriesMetadata(options);
+    const results = await Promise.all([
+      super.retrieveSeriesMetadata(options),
+      this.searchForInstances(options),
+    ]);
+    const metadata = results[0];
+    const instances = results[1];
+    return metadata.map(item => {
+      const sopUID = item['00080018'].Value[0];
+      const instance = instances.find(
+        instance => instance['00080018'].Value[0] == sopUID
+      );
+      Object.assign(item, instance);
+      return item;
+    });
   }
 
   async searchForStudies(options) {

@@ -85,7 +85,12 @@ const _promoteStudyDisplaySet = (study, studyMetadata, filters) => {
  * @returns {number} the FrameIndex of the SOPInstanceUID in the given displaySet
  */
 const _findSOPInstanceUIDFrame = (displaySet, SOPInstanceUID) => {
-  const frameIndex = displaySet.images.findIndex(
+  const objectList = displaySet.images || displaySet.others;
+  if (!objectList) {
+    console.warn('displaySet missing images array', displaySet);
+    return;
+  }
+  const frameIndex = objectList.findIndex(
     image => image.SOPInstanceUID === SOPInstanceUID
   );
 

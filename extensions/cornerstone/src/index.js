@@ -54,6 +54,7 @@ export default {
       const onNewImageHandler = jumpData => {
         /** Do not trigger all viewports to render unnecessarily */
         jumpData.refreshViewports = false;
+        console.log("Calling jumpToImage", jumpData);
         commandsManager.runCommand('jumpToImage', jumpData);
       };
 

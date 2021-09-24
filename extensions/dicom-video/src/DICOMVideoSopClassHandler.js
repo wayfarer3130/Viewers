@@ -1,5 +1,4 @@
 import OHIF from '@ohif/core';
-import requestVideoFile from './requestVideoFile';
 
 const { utils, metadata } = OHIF;
 const { OHIFSeriesMetadata } = metadata;
@@ -32,8 +31,9 @@ function generateVideoUrl(baseWadoRsUri, metadata) {
   const { StudyInstanceUID } = metadata;
   // If the BulkDataURI isn't present, then assume it uses the pixeldata endpoint
   // The standard isn't quite clear on that, but appears to be what is expected
-  const BulkDataURI = metadata.PixelData && metadata.PixelData.BulkDataURI 
-     || `series/${metadata.SeriesInstanceUID}/instances/${metadata.SOPInstanceUID}/pixeldata`;
+  const BulkDataURI =
+    (metadata.PixelData && metadata.PixelData.BulkDataURI) ||
+    `series/${metadata.SeriesInstanceUID}/instances/${metadata.SOPInstanceUID}/pixeldata`;
   const hasQuery = BulkDataURI.indexOf('?') != -1;
   const hasAccept = BulkDataURI.indexOf('accept=') != -1;
   const wadoRoot = baseWadoRsUri.substring(
@@ -42,7 +42,7 @@ function generateVideoUrl(baseWadoRsUri, metadata) {
   );
   const acceptUri =
     BulkDataURI +
-    (hasAccept ? '' : ((hasQuery ? '&' : '?') + 'accept=video/mp4'));
+    (hasAccept ? '' : (hasQuery ? '&' : '?') + 'accept=video/mp4');
   if (BulkDataURI.indexOf('http') == 0) return acceptUri;
   if (BulkDataURI.indexOf('/') == 0) return wadoRoot + acceptUri;
   if (BulkDataURI.indexOf('series/') == 0) {
@@ -55,141 +55,49 @@ const DICOMVideoSopClassHandler = {
   id: 'DICOMVideoSopClassHandlerPlugin',
   sopClassUIDs,
 
-  getDisplaySetFromSeries: async function getDisplaySetFromSeries(
+  getDisplaySetFromSeries: function getDisplaySetFromSeries(
     series,
     study,
-    dicomWebClient,
-    headers,
-    addDisplaySet,
-    skipGenerationOfRemainingDisplaySets = false
+    dicomWebClient
   ) {
-    const instance = series.getFirstInstance();
+    return series._instances
+      .filter(i => {
+        const metadata = i.getData().metadata;
+        const tsuid =
+          metadata.AvailableTransferSyntaxUID || metadata.TransferSyntaxUID;
+        return (
+          sopClassUIDs.includes(metadata.SOPClassUID) &&
+          supportedTransferSyntaxUIDs.includes(tsuid)
+        );
+      })
+      .map(instance => {
+        const metadata = instance.getData().metadata;
 
-    const {
-      wadouri,
-      metadata: naturalizedDataset,
-      baseWadoRsUri,
-    } = instance.getData();
+        const { baseWadoRsUri } = instance.getData();
+        const { Modality, FrameOfReferenceUID, SOPInstanceUID } = metadata;
+        const { SeriesDescription, ContentDate, ContentTime } = metadata;
+        const { SeriesNumber, SeriesInstanceUID, StudyInstanceUID } = metadata;
 
-    const {
-      FrameOfReferenceUID,
-      SeriesDescription,
-      ContentDate,
-      ContentTime,
-      SeriesNumber,
-      Modality,
-      SOPInstanceUID,
-    } = naturalizedDataset;
-
-    const generateDisplaySetsForRemainingVideoInstances = async () => {
-      const possibleVideoInstances = series._instances.filter(i =>
-        sopClassUIDs.includes(i.getData().metadata.SOPClassUID)
-      );
-      const promises = possibleVideoInstances.map(async (instance, index) => {
-        if (index > 0) {
-          const seriesWithOneVideoInstance = new OHIFSeriesMetadata(
-            series.getData(),
-            study
-          );
-          seriesWithOneVideoInstance.setInstances([instance]);
-          study.addSeries(seriesWithOneVideoInstance);
-
-          const displaySet = await getDisplaySetFromSeries(
-            seriesWithOneVideoInstance,
-            study,
-            dicomWebClient,
-            headers,
-            addDisplaySet,
-            true
-          );
-
-          if (displaySet && !displaySet.Modality) {
-            displaySet.Modality = instance.getTagValue('Modality');
-          }
-
-          if (displaySet) {
-            addDisplaySet(displaySet);
-          }
-        }
+        return {
+          plugin: 'video',
+          Modality,
+          displaySetInstanceUID: utils.guid(),
+          dicomWebClient,
+          SOPInstanceUID,
+          SeriesInstanceUID,
+          StudyInstanceUID,
+          referenceInstance: instance,
+          videoUrl: generateVideoUrl(baseWadoRsUri, metadata),
+          others: [instance],
+          imageId: metadata.imageId,
+          FrameOfReferenceUID,
+          metadata,
+          SeriesDescription,
+          SeriesDate: ContentDate,
+          SeriesTime: ContentTime,
+          SeriesNumber,
+        };
       });
-      await Promise.all(promises);
-    };
-
-    if (!skipGenerationOfRemainingDisplaySets) {
-      await generateDisplaySetsForRemainingVideoInstances();
-    }
-
-    const instanceMetadata = instance.getData().metadata;
-    const { AvailableTransferSyntaxUID } = instanceMetadata;
-    if (AvailableTransferSyntaxUID) {
-      console.log('AvailableTransferSyntaxUID', AvailableTransferSyntaxUID);
-      if (!supportedTransferSyntaxUIDs.includes(AvailableTransferSyntaxUID)) {
-        return;
-      }
-      return {
-        plugin: 'video',
-        Modality,
-        displaySetInstanceUID: utils.guid(),
-        dicomWebClient,
-        SOPInstanceUID,
-        SeriesInstanceUID: series.getSeriesInstanceUID(),
-        StudyInstanceUID: study.getStudyInstanceUID(),
-        referenceInstance: instance,
-        videoUrl: generateVideoUrl(baseWadoRsUri, instanceMetadata),
-        imageId: naturalizedDataset.imageId,
-        FrameOfReferenceUID,
-        metadata: naturalizedDataset,
-        SeriesDescription,
-        SeriesDate: ContentDate,
-        SeriesTime: ContentTime,
-        SeriesNumber,
-      };
-    }
-
-    const url = wadouri.replace('dicomweb', 'https');
-    console.log('Requesting video file', url);
-    const {
-      src,
-      type,
-      dicomData,
-      dataset,
-      TransferSyntaxUID,
-    } = await requestVideoFile({ url });
-
-    if (!supportedTransferSyntaxUIDs.includes(TransferSyntaxUID)) {
-      return;
-    }
-
-    console.debug('Video type information:', type);
-    console.debug(
-      'Video TransferSyntax:',
-      Object.keys(SupportedTransferSyntaxes).find(
-        key => SupportedTransferSyntaxes[key] === TransferSyntaxUID
-      )
-    );
-
-    /**
-     * Note: We are passing the dicomWebClient into each viewport!
-     */
-
-    return {
-      plugin: 'video',
-      Modality,
-      displaySetInstanceUID: utils.guid(),
-      dicomWebClient,
-      SOPInstanceUID,
-      SeriesInstanceUID: series.getSeriesInstanceUID(),
-      StudyInstanceUID: study.getStudyInstanceUID(),
-      referenceInstance: instance,
-      wadouri,
-      imageId: naturalizedDataset.imageId,
-      FrameOfReferenceUID,
-      metadata: naturalizedDataset,
-      SeriesDescription,
-      SeriesDate: ContentDate,
-      SeriesTime: ContentTime,
-      SeriesNumber,
-    };
   },
 };
 

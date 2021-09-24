@@ -10,7 +10,7 @@ window.config = {
         wadoRoot: 'http://localhost:5000/',
         qidoSupportsIncludeField: false,
         imageRendering: 'wadors',
-        thumbnailRendering: 'wadors',
+        thumbnailRendering: 'thumbnail',
         enableStudyLazyLoad: true,
         supportsFuzzyMatching: false,
         staticWado: true,

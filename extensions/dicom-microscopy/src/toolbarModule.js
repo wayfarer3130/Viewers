@@ -186,6 +186,29 @@ const definitions = [
       ],
     },
   },
+  // {
+  //   id: 'EllipseROI',
+  //   label: 'Ellipse ROI',
+  //   icon: 'ellipse-circle',
+  //   type: TOOLBAR_BUTTON_TYPES.SET_TOOL_ACTIVE,
+  //   commandName: 'activateInteractions',
+  //   commandOptions: {
+  //     interactions: [
+  //       ...defaultInteractions,
+  //       [
+  //         'draw',
+  //         {
+  //           geometryType: 'ellipse',
+  //           styleOptions: styles.default,
+  //           markup: 'measurement',
+  //           bindings: {
+  //             mouseButtons: ['left'],
+  //           },
+  //         },
+  //       ],
+  //     ],
+  //   },
+  // },
   {
     id: 'CircleROI',
     label: 'Circle ROI',

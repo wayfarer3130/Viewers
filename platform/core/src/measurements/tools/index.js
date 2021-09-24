@@ -10,6 +10,7 @@ import { angle } from './angle';
 import { targetCR } from './targetCR';
 import { targetNE } from './targetNE';
 import { targetUN } from './targetUN';
+import { cobbAngle } from './cobbAngle';
 
 export {
   arrowAnnotate,
@@ -19,6 +20,7 @@ export {
   freehandMouse,
   length,
   nonTarget,
+  cobbAngle,
   rectangleRoi,
   angle,
   targetCR,

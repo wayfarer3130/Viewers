@@ -60,6 +60,7 @@ export default function init({ servicesManager, configuration }) {
       csTools.ArrowAnnotateTool,
       csTools.BidirectionalTool,
       csTools.LengthTool,
+      csTools.CobbAngleTool,
       csTools.AngleTool,
       csTools.FreehandRoiTool,
       csTools.EllipticalRoiTool,

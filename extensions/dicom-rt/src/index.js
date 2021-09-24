@@ -57,6 +57,15 @@ export default {
               const study = studies.find(
                 s => s.StudyInstanceUID === activeViewport.StudyInstanceUID
               );
+              if (!study) {
+                console.warn(
+                  'Study',
+                  activeViewport.StudyInstanceUID,
+                  'not found in',
+                  studies
+                );
+                return true;
+              }
               const ds = study.displaySets.find(
                 ds =>
                   ds.displaySetInstanceUID ===

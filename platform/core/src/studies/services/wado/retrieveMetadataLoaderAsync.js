@@ -1,4 +1,4 @@
-import { api } from 'dicomweb-client';
+import StaticWadoClient from '../qido/StaticWadoClient';
 import dcmjs from 'dcmjs';
 import DICOMWeb from '../../../DICOMWeb/';
 import RetrieveMetadataLoader from './retrieveMetadataLoader';
@@ -73,7 +73,6 @@ function makeSeriesAsyncLoader(
         studyInstanceUID,
         seriesInstanceUID,
       });
-      console.log('makeSerisAsyncLoader', sopInstances);
       return { studyInstanceUID, seriesInstanceUID, sopInstances };
     },
   });
@@ -89,7 +88,8 @@ export default class RetrieveMetadataLoaderAsync extends RetrieveMetadataLoader 
   configLoad() {
     const { server } = this;
 
-    const client = new api.DICOMwebClient({
+    const client = new StaticWadoClient({
+      ...server,
       url: server.qidoRoot,
       headers: DICOMWeb.getAuthorizationHeader(server),
       errorInterceptor: errorHandler.getHTTPErrorHandler(),

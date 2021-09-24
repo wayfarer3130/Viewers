@@ -30,6 +30,7 @@ function StudyBrowser(props) {
                 SeriesNumber,
                 stackPercentComplete,
                 hasWarnings,
+                imageSrc,
               } = thumb;
 
               return (
@@ -48,6 +49,7 @@ function StudyBrowser(props) {
                     // Thumb
                     altImageText={altImageText}
                     imageId={imageId}
+                    imageSrc={imageSrc}
                     InstanceNumber={InstanceNumber}
                     displaySetInstanceUID={displaySetInstanceUID} // used by drop
                     numImageFrames={numImageFrames}

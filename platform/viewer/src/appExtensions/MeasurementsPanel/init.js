@@ -201,6 +201,10 @@ export default function init({
       onMeasurementModified
     );
     element.addEventListener(
+      csTools.EVENTS.MEASUREMENT_COMPLETED,
+      onMeasurementModified
+    );
+    element.addEventListener(
       csTools.EVENTS.LABELMAP_MODIFIED,
       onLabelmapModified
     );
