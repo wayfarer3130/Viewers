@@ -277,7 +277,6 @@ const commandsModule = ({ servicesManager }) => {
         );
       });
 
-      console.log("jumpToImage", SOPInstanceUID, displaySet);
       if (!displaySet) {
         return;
       }

@@ -134,6 +134,7 @@ class StudyMetadata extends Metadata {
         Modality: seriesData.Modality,
       });
 
+      console.log("Adding no instance series display set");
       displaySets.push(displaySet);
 
       return displaySets;
@@ -167,6 +168,7 @@ class StudyMetadata extends Metadata {
           }
 
           displaySets.push(displaySet);
+          console.log("Added module plugin display set", displaySet);
         });
         /** For now, only avoid early return if video present */
         if (!displaySets.some(ds => ds.plugin === 'video')) {
@@ -974,7 +976,7 @@ async function _getDisplaySetsFromSopClassModule(
     );
 
     const results =
-      (pluginResult && pluginResult.length && pluginResult) ||
+      (Array.isArray(pluginResult) && pluginResult) ||
       (pluginResult && [pluginResult]) ||
       [];
     for (const displaySet of results) {
@@ -984,7 +986,6 @@ async function _getDisplaySetsFromSopClassModule(
         displaySet.Modality =
           instance.Modality || instance.getTagValue('Modality');
       }
-
       displaySets.push(displaySet);
 
       if (displaySet.referenceInstance) {

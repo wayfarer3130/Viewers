@@ -65,10 +65,12 @@ const DICOMVideoSopClassHandler = {
         const metadata = i.getData().metadata;
         const tsuid =
           metadata.AvailableTransferSyntaxUID || metadata.TransferSyntaxUID;
-        return (
-          sopClassUIDs.includes(metadata.SOPClassUID) &&
-          supportedTransferSyntaxUIDs.includes(tsuid)
-        );
+        const hasSopMapping = sopClassUIDs.includes(metadata.SOPClassUID);
+        const supportedVideo = supportedTransferSyntaxUIDs.includes(tsuid);
+        if (hasSopMapping && !supportedVideo) {
+          console.log("SOP", metadata.SOPClassUID, "is video supported, but", tsuid, "not supported");
+        }
+        return hasSopMapping && supportedVideo;
       })
       .map(instance => {
         const metadata = instance.getData().metadata;
