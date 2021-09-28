@@ -140,6 +140,12 @@ class ViewerMain extends Component {
       displaySetInstanceUID
     );
 
+    if (!displaySet) {
+      const msg = `DisplaySet ${displaySetInstanceUID} not found for Study UID ${StudyInstanceUID}`;
+      console.warn(msg, this.props.studies);
+      return;
+    }
+
     if (displaySet.isDerived) {
       const { Modality } = displaySet;
       if (Modality === 'SEG' && servicesManager) {

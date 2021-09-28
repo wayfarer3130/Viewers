@@ -171,7 +171,7 @@ const _showUserMessage = (queryParamApplied, message, dialog = {}) => {
   });
 };
 
-const _addSeriesToStudy = async (studyMetadata, series) => {
+const _addSeriesToStudy = (studyMetadata, series) => {
   const sopClassHandlerModules =
     extensionManager.modules['sopClassHandlerModule'];
   const study = studyMetadata.getData();
@@ -184,7 +184,7 @@ const _addSeriesToStudy = async (studyMetadata, series) => {
     studyMetadata.addSeries(seriesMetadata);
   }
 
-  await studyMetadata.createAndAddDisplaySetsForSeries(
+  studyMetadata.createAndAddDisplaySetsForSeries(
     sopClassHandlerModules,
     seriesMetadata
   );
@@ -204,12 +204,12 @@ const _updateStudyMetadataManager = (study, studyMetadata) => {
   }
 };
 
-const _updateStudyDisplaySets = async (study, studyMetadata) => {
+const _updateStudyDisplaySets = (study, studyMetadata) => {
   const sopClassHandlerModules =
     extensionManager.modules['sopClassHandlerModule'];
 
   if (!study.displaySets) {
-    study.displaySets = await studyMetadata.createDisplaySets(
+    study.displaySets = studyMetadata.createDisplaySets(
       sopClassHandlerModules
     );
   }
@@ -274,18 +274,23 @@ function ViewerRetrieveStudyData({
       clearViewportSpecificData(0);
     }
 
-    if (seriesInstanceUID) {
-      const displaySet = study.displaySets.find(
-        displaySet => displaySet.SeriesInstanceUID === seriesInstanceUID
-      );
-
-      if (displaySet) {
-        if (sopInstanceUID) {
-          const frameIndex = _findSOPInstanceUIDFrame(
+    if (seriesInstanceUID || sopInstanceUID) {
+      let frameIndex;
+      const displaySet = study.displaySets.filter(
+        displaySet =>
+          !seriesInstanceUID
+          || displaySet.SeriesInstanceUID === seriesInstanceUID
+      ).find(displaySet => {
+        if (!sopInstanceUID) return true;
+        frameIndex = _findSOPInstanceUIDFrame(
             displaySet,
             sopInstanceUID
           );
+        if (frameIndex !== undefined && frameIndex !== -1) return true;
+      });
 
+      if (displaySet) {
+        if (frameIndex !== undefined) {
           setFirstViewportSpecificData({ ...displaySet, frameIndex });
         } else {
           setFirstViewportSpecificData(displaySet);
@@ -332,7 +337,7 @@ function ViewerRetrieveStudyData({
           study.StudyInstanceUID
         );
 
-        await _updateStudyDisplaySets(study, studyMetadata);
+        _updateStudyDisplaySets(study, studyMetadata);
         _updateStudyMetadataManager(study, studyMetadata);
 
         // Attempt to load remaning series if any
