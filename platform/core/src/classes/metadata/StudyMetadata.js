@@ -177,8 +177,6 @@ class StudyMetadata extends Metadata {
         if (!displaySets.some(ds => ds.plugin === 'video')) {
           return displaySets;
         }
-      } else {
-        console.log("No display sets added from plugins");
       }
     }
 
