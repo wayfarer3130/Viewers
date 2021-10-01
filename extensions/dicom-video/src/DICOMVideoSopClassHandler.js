@@ -68,7 +68,7 @@ const DICOMVideoSopClassHandler = {
         const hasSopMapping = sopClassUIDs.includes(metadata.SOPClassUID);
         const supportedVideo = supportedTransferSyntaxUIDs.includes(tsuid);
         if (hasSopMapping && !supportedVideo) {
-          console.log("SOP", metadata.SOPClassUID, "is video supported, but",
+          console.warn("SOP", metadata.SOPClassUID, "is video supported, but",
             tsuid, "not supported on instance ", metadata.SOPInstanceUID);
         }
         return hasSopMapping && supportedVideo;

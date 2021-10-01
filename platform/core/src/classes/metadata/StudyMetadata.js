@@ -134,11 +134,6 @@ class StudyMetadata extends Metadata {
         Modality: seriesData.Modality,
       });
 
-      console.log("Adding no instance series display set",
-        seriesData.SeriesDescription,
-        seriesData.SeriesInstanceUID,
-        displaySet,
-      );
       displaySets.push(displaySet);
 
       return displaySets;
@@ -171,7 +166,6 @@ class StudyMetadata extends Metadata {
           }
 
           displaySets.push(displaySet);
-          console.log("Added module plugin display set", displaySet);
         });
         /** For now, only avoid early return if video present */
         if (!displaySets.some(ds => ds.plugin === 'video')) {
@@ -237,7 +231,6 @@ class StudyMetadata extends Metadata {
           AcquisitionDatetime: instance.getTagValue('AcquisitionDateTime'), // Include the acquisition datetime
         });
       }
-      console.log("Adding key", key, "display set", displaySet);
       displaySets.push(displaySet);
     }
 
@@ -383,7 +376,6 @@ class StudyMetadata extends Metadata {
       displaySetsForSeries.forEach(ds => this._insertDisplaySet(ds));
     });
 
-    console.log("Created display sets", this._displaySets);
     return this._displaySets;
   }
 
@@ -947,6 +939,8 @@ function _getDisplaySetsFromSopClassModule(
   const displaySets = [];
   const instancesAlreadyMappedIntoADisplaySet = [];
 
+  let lastHandler;
+
   sopClassUIDs.map(SOPClassUID => {
     const sopClassHandlerModules = sopClassHandlerExtensions.map(extension => {
       return extension.module;
@@ -962,6 +956,14 @@ function _getDisplaySetsFromSopClassModule(
     }
 
     const plugin = handlersForSopClassUID[0];
+    if (plugin === lastHandler) {
+      // TODO - the right behaviour is to run the split beforehand,
+      // and then run the plugin on the split result
+      console.log("Already handled this series by", plugin.id);
+      return;
+    }
+    lastHandler = plugin;
+
     const headers = DICOMWeb.getAuthorizationHeader();
     const errorInterceptor = errorHandler.getHTTPErrorHandler();
     const dicomWebClient = new dwc({
