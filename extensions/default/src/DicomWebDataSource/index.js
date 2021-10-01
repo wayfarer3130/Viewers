@@ -47,6 +47,7 @@ function createDicomWebApi(dicomWebConfig, UserAuthenticationService) {
     supportsFuzzyMatching,
     supportsWildcard,
     supportsReject,
+    requestOptions,
     staticWado,
   } = dicomWebConfig;
 

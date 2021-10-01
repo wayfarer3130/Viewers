@@ -27,12 +27,14 @@ export default class StaticWadoClient extends api.DICOMwebClient {
     let searchResult = await super.searchForStudies(options);
     const { queryParams } = options;
     if (!queryParams) return searchResult;
+    // console.log('Query params', queryParams);
     const filtered = searchResult.filter(study => {
       for (const key of Object.keys(StaticWadoClient.filterKeys)) {
         if (!this.filterItem(key, queryParams, study)) return false;
       }
       return true;
     });
+    // console.log("Searching - filtered response has", filtered.length, "items in it:", filtered);
     return filtered;
   }
 
@@ -42,7 +44,9 @@ export default class StaticWadoClient extends api.DICOMwebClient {
     const testValue = queryParams[key] || queryParams[altKey];
     if (!testValue) return true;
     const valueElem = study[key] || study[altKey];
-    if (!valueElem) return false;
+    if (!valueElem) {
+      return false;
+    }
     const value = valueElem.Value;
     return value === testValue || (value.indexOf && value.indexOf(testValue) >= 0);
   }

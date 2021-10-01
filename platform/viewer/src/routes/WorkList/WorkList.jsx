@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import moment from 'moment';
 import qs from 'query-string';
 import isEqual from 'lodash.isequal';
@@ -11,6 +11,7 @@ import filtersMeta from './filtersMeta.js';
 import { useAppConfig } from '@state';
 import { useDebounce, useQuery } from '@hooks';
 import { utils, hotkeys } from '@ohif/core';
+import ConfigPoint from 'config-point';
 
 const { sortBySeriesDate } = utils;
 
@@ -29,6 +30,8 @@ import {
   UserPreferences,
 } from '@ohif/ui';
 
+import StudyListConfig from './StudyListConfig';
+
 import i18n from '@ohif/i18n';
 
 const { availableLanguages, defaultLanguage, currentLanguage } = i18n;
@@ -45,7 +48,10 @@ function WorkList({
   isLoadingData,
   dataSource,
   hotkeysManager,
+  configPoint,
 }) {
+  configPoint = configPoint || WorkListConfig;
+  const defaultFilterValues = configPoint.defaultFilterValues;
   const { hotkeyDefinitions, hotkeyDefaults } = hotkeysManager;
   const { show, hide } = useModal();
   const { t } = useTranslation();
@@ -60,6 +66,7 @@ function WorkList({
     ...defaultFilterValues,
     ...queryFilterValues,
   });
+  const origSearch = qs.parse(useLocation().search);
 
   const debouncedFilterValues = useDebounce(filterValues, 200);
   const { resultsPerPage, pageNumber, sortBy, sortDirection } = filterValues;
@@ -154,7 +161,7 @@ function WorkList({
       return;
     }
 
-    const queryString = {};
+    const queryString = { ...origSearch };
     Object.keys(defaultFilterValues).forEach(key => {
       const defaultValue = defaultFilterValues[key];
       const currValue = debouncedFilterValues[key];
@@ -228,148 +235,7 @@ function WorkList({
   const rollingPageNumber = (pageNumber - 1) % rollingPageNumberMod;
   const offset = resultsPerPage * rollingPageNumber;
   const offsetAndTake = offset + resultsPerPage;
-  const tableDataSource = sortedStudies.map((study, key) => {
-    const rowKey = key + 1;
-    const isExpanded = expandedRows.some(k => k === rowKey);
-    const {
-      studyInstanceUid,
-      accession,
-      modalities,
-      instances,
-      description,
-      mrn,
-      patientName,
-      date,
-      time,
-    } = study;
-    const studyDate =
-      date &&
-      moment(date, ['YYYYMMDD', 'YYYY.MM.DD'], true).isValid() &&
-      moment(date, ['YYYYMMDD', 'YYYY.MM.DD']).format('MMM-DD-YYYY');
-    const studyTime =
-      time &&
-      moment(time, ['HH', 'HHmm', 'HHmmss', 'HHmmss.SSS']).isValid() &&
-      moment(time, ['HH', 'HHmm', 'HHmmss', 'HHmmss.SSS']).format('hh:mm A');
-
-    return {
-      row: [
-        {
-          key: 'patientName',
-          content: patientName ? (
-            <TooltipClipboard>{patientName}</TooltipClipboard>
-          ) : (
-            <span className="text-gray-700">(Empty)</span>
-          ),
-          gridCol: 4,
-        },
-        {
-          key: 'mrn',
-          content: <TooltipClipboard>{mrn}</TooltipClipboard>,
-          gridCol: 3,
-        },
-        {
-          key: 'studyDate',
-          content: (
-            <>
-              {studyDate && <span className="mr-4">{studyDate}</span>}
-              {studyTime && <span>{studyTime}</span>}
-            </>
-          ),
-          title: `${studyDate || ''} ${studyTime || ''}`,
-          gridCol: 5,
-        },
-        {
-          key: 'description',
-          content: <TooltipClipboard>{description}</TooltipClipboard>,
-          gridCol: 4,
-        },
-        {
-          key: 'modality',
-          content: modalities,
-          title: modalities,
-          gridCol: 3,
-        },
-        {
-          key: 'accession',
-          content: <TooltipClipboard>{accession}</TooltipClipboard>,
-          gridCol: 3,
-        },
-        {
-          key: 'instances',
-          content: (
-            <>
-              <Icon
-                name="group-layers"
-                className={classnames('inline-flex mr-2 w-4', {
-                  'text-primary-active': isExpanded,
-                  'text-secondary-light': !isExpanded,
-                })}
-              />
-              {instances}
-            </>
-          ),
-          title: (instances || 0).toString(),
-          gridCol: 4,
-        },
-      ],
-      expandedContent: (
-        <StudyListExpandedRow
-          seriesTableColumns={{
-            description: 'Description',
-            seriesNumber: 'Series',
-            modality: 'Modality',
-            instances: 'Instances',
-          }}
-          seriesTableDataSource={
-            seriesInStudiesMap.has(studyInstanceUid)
-              ? seriesInStudiesMap.get(studyInstanceUid).map(s => {
-                  return {
-                    description: s.description || '(empty)',
-                    seriesNumber: s.seriesNumber || '',
-                    modality: s.modality || '',
-                    instances: s.numSeriesInstances || '',
-                  };
-                })
-              : []
-          }
-        >
-          {appConfig.modes.map((mode, i) => {
-            const isFirst = i === 0;
-
-            // TODO: Modes need a default/target route? We mostly support a single one for now.
-            // We should also be using the route path, but currently are not
-            // mode.id
-            // mode.routes[x].path
-            // Don't specify default data source, and it should just be picked up... (this may not currently be the case)
-            // How do we know which params to pass? Today, it's just StudyInstanceUIDs
-            return (
-              <Link
-                key={i}
-                to={`${mode.id}?StudyInstanceUIDs=${studyInstanceUid}`}
-                // to={`${mode.id}/dicomweb?StudyInstanceUIDs=${studyInstanceUid}`}
-              >
-                <Button
-                  rounded="full"
-                  variant="contained" // outlined
-                  disabled={false}
-                  endIcon={<Icon name="launch-arrow" />} // launch-arrow | launch-info
-                  className={classnames('font-bold', { 'ml-2': !isFirst })}
-                  onClick={() => {}}
-                >
-                  {t(`Modes:${mode.displayName}`)}
-                </Button>
-              </Link>
-            );
-          })}
-        </StudyListExpandedRow>
-      ),
-      onClickRow: () =>
-        setExpandedRows(s =>
-          isExpanded ? s.filter(n => rowKey !== n) : [...s, rowKey]
-        ),
-      isExpanded,
-    };
-  });
+  const tableDataSource = sortedStudies.map((study, key) => StudyListConfig({ rowData: study, key, expandedRows, appConfig, t, setExpandedRows, seriesInStudiesMap }));
 
   const hasStudies = numOfStudies > 0;
   const versionNumber = process.env.VERSION_NUMBER;
@@ -422,7 +288,7 @@ function WorkList({
         filterValues={{ ...filterValues, ...defaultSortValues }}
         onChange={setFilterValues}
         clearFilters={() => setFilterValues(defaultFilterValues)}
-        isFiltering={isFiltering(filterValues, defaultFilterValues)}
+        isFiltering={isFiltering(filterValues, emptyFilterValues)}
       />
       {hasStudies ? (
         <>
@@ -455,7 +321,7 @@ WorkList.propTypes = {
   isLoadingData: PropTypes.bool.isRequired,
 };
 
-const defaultFilterValues = {
+const emptyFilterValues = {
   patientName: '',
   mrn: '',
   studyDate: {
@@ -525,5 +391,12 @@ function _sortStringDates(s1, s2, sortModifier) {
     return -1 * sortModifier;
   }
 }
+
+export const DefaultWorkListConfig = {
+  defaultFilterValues: emptyFilterValues,
+  reactFunction: WorkList,
+};
+
+const WorkListConfig = ConfigPoint.addConfig('WorkList', DefaultWorkListConfig);
 
 export default WorkList;
