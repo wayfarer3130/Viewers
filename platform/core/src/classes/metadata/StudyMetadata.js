@@ -117,7 +117,7 @@ class StudyMetadata extends Metadata {
    * @param {SeriesMetadata} series The series metadata object from which the display sets will be created
    * @returns {Array} The list of display sets created for the given series object
    */
-  async _createDisplaySetsForSeries(sopClassHandlerModules, series) {
+  _createDisplaySetsForSeries(sopClassHandlerModules, series) {
     const study = this;
     const displaySets = [];
     const anyInstances = series.getInstanceCount() > 0;
@@ -134,7 +134,6 @@ class StudyMetadata extends Metadata {
         Modality: seriesData.Modality,
       });
 
-      console.log("Adding no instance series display set");
       displaySets.push(displaySet);
 
       return displaySets;
@@ -148,7 +147,7 @@ class StudyMetadata extends Metadata {
       const {
         displaySets: displaySetsFromSopClassModule,
         instancesAlreadyMappedIntoADisplaySet,
-      } = await _getDisplaySetsFromSopClassModule(
+      } = _getDisplaySetsFromSopClassModule(
         sopClassHandlerModules,
         series,
         study,
@@ -156,19 +155,17 @@ class StudyMetadata extends Metadata {
       );
       _instancesAlreadyMappedIntoADisplaySet = instancesAlreadyMappedIntoADisplaySet;
 
-      if (
-        displaySetsFromSopClassModule &&
-        displaySetsFromSopClassModule.length > 0
+      if (Array.isArray(displaySetsFromSopClassModule)
+        && displaySetsFromSopClassModule.length > 0
       ) {
         displaySetsFromSopClassModule.forEach(displaySet => {
           displaySet.sopClassModule = true;
-
+          if (!displaySet) return;
           if (displaySet.isDerived) {
             this._addDerivedDisplaySet(displaySet);
           }
 
           displaySets.push(displaySet);
-          console.log("Added module plugin display set", displaySet);
         });
         /** For now, only avoid early return if video present */
         if (!displaySets.some(ds => ds.plugin === 'video')) {
@@ -361,7 +358,7 @@ class StudyMetadata extends Metadata {
    * @param {StudyMetadata} study The study instance metadata to be used
    * @returns {Array} An array of series to be placed in the Study Metadata
    */
-  async createDisplaySets(sopClassHandlerModules) {
+  createDisplaySets(sopClassHandlerModules) {
     const displaySets = [];
     const anyDisplaySets = this.getSeriesCount();
 
@@ -370,16 +367,14 @@ class StudyMetadata extends Metadata {
     }
 
     // Loop through the series (SeriesMetadata)
-    const promises = this._series.map(async (series, index) => {
-      const displaySetsForSeries = await this._createDisplaySetsForSeries(
+    this._series.map((series, index) => {
+      const displaySetsForSeries = this._createDisplaySetsForSeries(
         sopClassHandlerModules,
         series
       );
 
       displaySetsForSeries.forEach(ds => this._insertDisplaySet(ds));
     });
-
-    await Promise.all(promises);
 
     return this._displaySets;
   }
@@ -390,12 +385,12 @@ class StudyMetadata extends Metadata {
    * @param {SeriesMetadata} series The series metadata object from which the display sets will be created
    * @returns {boolean} Returns true on success or false on failure (e.g., the series does not belong to this study)
    */
-  async createAndAddDisplaySetsForSeries(sopClassHandlerModules, series) {
+  createAndAddDisplaySetsForSeries(sopClassHandlerModules, series) {
     if (!this.containsSeries(series)) {
       return false;
     }
 
-    const displaySets = await this._createDisplaySetsForSeries(
+    const displaySets = this._createDisplaySetsForSeries(
       sopClassHandlerModules,
       series
     );
@@ -935,7 +930,7 @@ function getSopClassUIDs(series) {
  * @param {StudyMetadata} study
  * @param {string[]} sopClassUIDs
  */
-async function _getDisplaySetsFromSopClassModule(
+function _getDisplaySetsFromSopClassModule(
   sopClassHandlerExtensions, // TODO: Update Usage
   series,
   study,
@@ -944,7 +939,9 @@ async function _getDisplaySetsFromSopClassModule(
   const displaySets = [];
   const instancesAlreadyMappedIntoADisplaySet = [];
 
-  const promises = sopClassUIDs.map(async SOPClassUID => {
+  let lastHandler;
+
+  sopClassUIDs.map(SOPClassUID => {
     const sopClassHandlerModules = sopClassHandlerExtensions.map(extension => {
       return extension.module;
     });
@@ -959,6 +956,14 @@ async function _getDisplaySetsFromSopClassModule(
     }
 
     const plugin = handlersForSopClassUID[0];
+    if (plugin === lastHandler) {
+      // TODO - the right behaviour is to run the split beforehand,
+      // and then run the plugin on the split result
+      console.log("Already handled this series by", plugin.id);
+      return;
+    }
+    lastHandler = plugin;
+
     const headers = DICOMWeb.getAuthorizationHeader();
     const errorInterceptor = errorHandler.getHTTPErrorHandler();
     const dicomWebClient = new dwc({
@@ -995,8 +1000,6 @@ async function _getDisplaySetsFromSopClassModule(
       }
     }
   });
-
-  await Promise.all(promises);
 
   return {
     displaySets,

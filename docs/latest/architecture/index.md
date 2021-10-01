@@ -79,6 +79,7 @@ features common to Web-based medical imaging viewers. For example:
 - Managing a study's measurements
 - Managing a study's DICOM metadata
 - [A flexible pattern for extensions](../extensions/index.md)
+- Splitting/sorting images into sets of displayable items
 - And many others
 
 It does this while remaining decoupled from any particular view library or

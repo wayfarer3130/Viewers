@@ -58,11 +58,11 @@ export default {
                 s => s.StudyInstanceUID === activeViewport.StudyInstanceUID
               );
               if (!study) {
-                console.warn(
+                console.log(
                   'Study',
                   activeViewport.StudyInstanceUID,
                   'not found in',
-                  studies
+                  studies, "may not be loaded yet",
                 );
                 return true;
               }
