@@ -47,7 +47,7 @@ export class StudyPrefetcher {
   }
 
   stopPrefetching() {
-    cornerstoneTools.requestPoolManager.clearRequestStack('prefetch');
+    cornerstone.imageLoadPoolManager.clearRequestStack('prefetch');
   }
 
   prefetchDisplaySetsAsync(timeout) {
@@ -74,23 +74,27 @@ export class StudyPrefetcher {
 
   prefetchImageIds(imageIds) {
     const nonCachedImageIds = this.filterCachedImageIds(imageIds);
-    const requestPoolManager = cornerstoneTools.requestPoolManager;
+    const imageLoadPoolManager = cornerstone.imageLoadPoolManager;
     const requestType = 'prefetch';
     const preventCache = false;
     const noop = () => {};
 
+    let requestFn;
+    if (this.options.preventCache) {
+      requestFn = id => cornerstone.loadImage(id);
+    } else {
+      requestFn = id => cornerstone.loadAndCacheImage(id);
+    }
+
     nonCachedImageIds.forEach(imageId => {
-      requestPoolManager.addRequest(
-        {},
-        imageId,
-        requestType,
-        preventCache,
-        noop,
-        noop
+      imageLoadPoolManager.addRequest(
+        requestFn.bind(this, imageId),
+        this.options.requestType,
+        {
+          imageId,
+        }
       );
     });
-
-    requestPoolManager.startGrabbing();
   }
 
   getStudy(image) {
