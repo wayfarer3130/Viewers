@@ -1,6 +1,6 @@
 import './ViewportGrid.css';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { utils } from '@ohif/core';
@@ -35,6 +35,7 @@ const ViewportGrid = function(props) {
     return null;
   }
 
+  const [contextMenu, setContextMenu] = useState({ show: false, x: 350, y: 200 });
   const snackbar = useSnackbarContext();
   const logger = useLogger();
 

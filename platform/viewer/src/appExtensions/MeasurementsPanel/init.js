@@ -11,6 +11,7 @@ const {
   onAdded,
   onRemoved,
   onModified,
+  onCompleted,
 } = OHIF.measurements.MeasurementHandlers;
 
 const MEASUREMENT_ACTION_MAP = {
@@ -19,6 +20,7 @@ const MEASUREMENT_ACTION_MAP = {
   modified: throttle(event => {
     return onModified(event);
   }, 300),
+  completed: onCompleted,
 };
 
 /**
@@ -35,13 +37,13 @@ export default function init({
 }) {
   const { UIDialogService } = servicesManager.services;
 
-  // TODO: MEASUREMENT_COMPLETED (not present in initial implementation)
   const onMeasurementsChanged = (action, event) => {
     return MEASUREMENT_ACTION_MAP[action](event);
   };
   const onMeasurementAdded = onMeasurementsChanged.bind(this, 'added');
   const onMeasurementRemoved = onMeasurementsChanged.bind(this, 'removed');
   const onMeasurementModified = onMeasurementsChanged.bind(this, 'modified');
+  const onMeasurementCompleted = onMeasurementsChanged.bind(this, 'completed');
   const onLabelmapModified = onMeasurementsChanged.bind(
     this,
     'labelmapModified'
@@ -96,6 +98,7 @@ export default function init({
   };
 
   const onRightClick = event => {
+    console.log("onRightClick");
     if (!UIDialogService) {
       console.warn('Unable to show dialog; no UI Dialog Service available.');
       return;
@@ -109,6 +112,9 @@ export default function init({
       defaultPosition: _getDefaultPosition(event.detail),
       content: ToolContextMenu,
       contentProps: {
+        contextMenuItems: [
+          { label: 'One' },
+        ],
         eventData: event.detail,
         onDelete: (nearbyToolData, eventData) => {
           const element = eventData.element;
@@ -202,7 +208,7 @@ export default function init({
     );
     element.addEventListener(
       csTools.EVENTS.MEASUREMENT_COMPLETED,
-      onMeasurementModified
+      onMeasurementCompleted
     );
     element.addEventListener(
       csTools.EVENTS.LABELMAP_MODIFIED,

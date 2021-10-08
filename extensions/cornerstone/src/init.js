@@ -209,6 +209,7 @@ const _connectToolsToMeasurementService = measurementService => {
       const {
         MEASUREMENT_ADDED,
         MEASUREMENT_UPDATED,
+        MEASUREMENT_COMPLETED,
       } = measurementService.EVENTS;
 
       measurementService.subscribe(
@@ -223,6 +224,13 @@ const _connectToolsToMeasurementService = measurementService => {
             );
             console.log('Mapped annotation:', annotation);
           }
+        }
+      );
+
+      measurementService.subscribe(
+        MEASUREMENT_COMPLETED,
+        ({ source, measurement }) => {
+          console.log('Subscribed service: measurement complete', measurement);
         }
       );
 
@@ -264,6 +272,7 @@ const _connectToolsToMeasurementService = measurementService => {
       [
         csTools.EVENTS.MEASUREMENT_ADDED,
         csTools.EVENTS.MEASUREMENT_MODIFIED,
+        csTools.EVENTS.MEASUREMENT_COMPLETED,
       ].forEach(csToolsEvtName => {
         event.detail.element.addEventListener(
           csToolsEvtName,

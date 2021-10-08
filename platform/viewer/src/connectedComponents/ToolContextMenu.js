@@ -1,6 +1,7 @@
 import { ContextMenu } from '@ohif/ui';
 import PropTypes from 'prop-types';
 import React from 'react';
+import ViewportContextMenu from '../components/ViewportGrid/ViewportContextMenu.js';
 import { commandsManager } from './../App.js';
 
 const toolTypes = [
@@ -13,14 +14,16 @@ const toolTypes = [
   'RectangleRoi',
 ];
 
-const ToolContextMenu = ({
-  onSetLabel,
-  onSetDescription,
-  isTouchEvent,
-  eventData,
-  onClose,
-  onDelete,
-}) => {
+const ToolContextMenu = (props) => {
+  const {
+    onSetLabel,
+    onSetDescription,
+    isTouchEvent,
+    eventData,
+    onClose,
+    onDelete,
+    contextMenuItems,
+  } = props;
   const defaultDropdownItems = [
     {
       label: 'Delete measurement',
@@ -77,13 +80,17 @@ const ToolContextMenu = ({
 
         dropdownItems.push(item);
       });
+    } else if (contextMenuItems) {
+      contextMenuItems.forEach(item => {
+        dropdownItems.push(item);
+      });
     }
 
     return dropdownItems;
   };
 
   const onClickHandler = ({ action, params }) => {
-    action(params);
+    if (action) action(params);
     if (onClose) {
       onClose();
     }

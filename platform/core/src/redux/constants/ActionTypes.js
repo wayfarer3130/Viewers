@@ -17,6 +17,12 @@ export const ADD_SERVER = 'ADD_SERVER';
 export const SET_SERVERS = 'SET_SERVERS';
 
 /**
+ * Measurements
+ */
+export const SET_ACTIVE_MEASUREMENTS = "SET_ACTIVE_MEASUREMENTS";
+export const SET_MEASUREMENTS = "SET_MEASUREMENTS";
+
+/**
  * EXTENSIONS
  */
 export const SET_EXTENSION_DATA = 'SET_EXTENSION_DATA';

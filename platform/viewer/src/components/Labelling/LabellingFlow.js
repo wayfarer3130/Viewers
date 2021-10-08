@@ -4,9 +4,36 @@ import PropTypes from 'prop-types';
 import cloneDeep from 'lodash.clonedeep';
 
 import LabellingTransition from './LabellingTransition.js';
-import OHIFLabellingData from './OHIFLabellingData.js';
+import ConfigPoint from 'config-point';
+import './OHIFLabellingData';
 import EditDescriptionDialog from './../EditDescriptionDialog/EditDescriptionDialog.js';
 import './LabellingFlow.css';
+import { emptyTypeAnnotation } from '@babel/types';
+import { isEmpty } from 'validate.js';
+
+const toItems = (items, prefix = '') => {
+  return items.map(item => {
+    if (typeof item === 'string') {
+      return { label: item, value: `${prefix}${item}` };
+    }
+    const ret = { ...item };
+    if (!item.value) ret.value = `${prefix}${item.label} `;
+    if (!item.label) ret.label = ret.value;
+    if (item.items) {
+      ret.items = toItems(item.items, ret.value + ">");
+    }
+    return ret;
+  });
+};
+
+export const { LabellingFlowConfigPoint } = ConfigPoint.register(
+  {
+    configName: 'LabellingFlowConfigPoint',
+    configBase: {
+      labellingData: 'BodyPartLabellingData',
+    },
+  },
+);
 
 const LabellingFlow = ({
   measurementData,
@@ -16,6 +43,7 @@ const LabellingFlow = ({
   updateLabelling,
   labellingDoneCallback,
   editDescriptionOnDialog,
+  configPoint = LabellingFlowConfigPoint,
 }) => {
   const [fadeOutTimer, setFadeOutTimer] = useState();
   const [showComponent, setShowComponent] = useState(true);
@@ -26,6 +54,7 @@ const LabellingFlow = ({
     editDescription,
     skipAddLabelButton,
   });
+  const labellingItems = ConfigPoint.getConfig(configPoint.labellingData).items;
 
   useEffect(() => {
     const newMeasurementData = cloneDeep(measurementData);
@@ -90,6 +119,7 @@ const LabellingFlow = ({
   const selectTreeSelectCallback = (event, itemSelected) => {
     const location = itemSelected.value;
     const locationLabel = itemSelected.label;
+    console.log("Select tree callback", location);
     updateLabelling({ location });
 
     setState(state => ({
@@ -150,7 +180,7 @@ const LabellingFlow = ({
       if (editLocation) {
         return (
           <SelectTree
-            items={OHIFLabellingData}
+            items={toItems(labellingItems)}
             columns={1}
             onSelected={selectTreeSelectCallback}
             selectTreeFirstTitle="Assign Label"
@@ -163,7 +193,7 @@ const LabellingFlow = ({
               <Icon name="check" className="checkIcon" />
             </div>
             <div className="locationDescriptionWrapper">
-              <div className="location">{locationLabel}</div>
+              <div className="location">{location}</div>
               <div className="description">
                 <input
                   id="descriptionInput"

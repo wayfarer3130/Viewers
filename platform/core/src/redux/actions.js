@@ -11,6 +11,8 @@ import {
   SET_VIEWPORT_LAYOUT,
   SET_VIEWPORT_LAYOUT_AND_DATA,
   SET_USER_PREFERENCES,
+  SET_MEASUREMENTS,
+  SET_ACTIVE_MEASUREMENTS,
 } from './constants/ActionTypes.js';
 
 /**
@@ -100,15 +102,24 @@ export const setExtensionData = (extension, data) => ({
   data,
 });
 
+// Measurement related
+
 export const setTimepoints = state => ({
   type: 'SET_TIMEPOINTS',
   state,
 });
 
 export const setMeasurements = state => ({
-  type: 'SET_MEASUREMENTS',
+  type: SET_MEASUREMENTS,
   state,
 });
+
+export const setActiveMeasurements = state => ({
+  type: SET_ACTIVE_MEASUREMENTS,
+  state,
+});
+
+// Study metadata related
 
 export const setStudyData = (StudyInstanceUID, data) => ({
   type: 'SET_STUDY_DATA',
@@ -140,6 +151,7 @@ const actions = {
   setExtensionData,
   setTimepoints,
   setMeasurements,
+  setActiveMeasurements,
   setStudyData,
   setServers,
 };

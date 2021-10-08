@@ -6,7 +6,7 @@ import cornerstone from 'cornerstone-core';
 
 import jumpToRowItem from './jumpToRowItem.js';
 
-const { setViewportSpecificData } = OHIF.redux.actions;
+const { setViewportSpecificData, setActiveMeasurements } = OHIF.redux.actions;
 const { MeasurementApi } = OHIF.measurements;
 
 /**
@@ -343,8 +343,8 @@ const mapDispatchToProps = (dispatch, ownProps) => {
       //dispatch(setViewportActive(viewportIndex));
 
       // Needs to update timepointsManager.measurements state to set active measurementId
-      // TODO: Not yet implemented
-      //dispatch(setActiveMeasurement(measurementData.measurementId))
+      console.log("Dispatching jump to row item");
+      dispatch(setActiveMeasurements(measurementData.measurementId))
 
       // (later): Needs to set some property on state.extensions.cornerstone to synchronize viewport scrolling
     },

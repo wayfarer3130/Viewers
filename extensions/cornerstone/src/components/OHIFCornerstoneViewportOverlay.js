@@ -15,6 +15,7 @@ import classNames from 'classnames';
 import { Icon } from '@ohif/ui/src/elements/Icon';
 import { Tooltip } from '@ohif/ui/src/components/tooltip';
 import { OverlayTrigger } from '@ohif/ui/src/components/overlayTrigger';
+import ConfigPoint from 'config-point';
 
 class OHIFCornerstoneViewportOverlay extends PureComponent {
   static propTypes = {

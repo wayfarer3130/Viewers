@@ -36,6 +36,7 @@ import OHIFDICOMVideoExtension from '@ohif/extension-dicom-video';
 // Add this for Debugging purposes:
 //import OHIFDebuggingExtension from '@ohif/extension-debugging';
 import { version } from '../package.json';
+import ConfigPoint from 'config-point';
 
 /*
  * Default Settings
@@ -45,6 +46,10 @@ let config = {};
 if (window) {
   config = window.config || {};
   window.version = version;
+  window.ConfigPoint = ConfigPoint;
+
+  // Load the default theme settings
+  ConfigPoint.load('theme', '/theme', 'theme');
 }
 
 const appProps = {

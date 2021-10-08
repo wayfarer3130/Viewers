@@ -45,6 +45,7 @@ const MEASUREMENT_SCHEMA_KEYS = [
 const EVENTS = {
   MEASUREMENT_UPDATED: 'event::measurement_updated',
   MEASUREMENT_ADDED: 'event::measurement_added',
+  MEASUREMENT_COMPLETED: 'event::measurement_completed',
 };
 
 const VALUE_TYPES = {
@@ -312,10 +313,6 @@ class MeasurementService {
     };
 
     if (this.measurements[internalId]) {
-      log.info(
-        `Measurement already defined. Updating measurement.`,
-        newMeasurement
-      );
       this.measurements[internalId] = newMeasurement;
       this._broadcastChange(
         this.EVENTS.MEASUREMENT_UPDATED,
@@ -323,7 +320,6 @@ class MeasurementService {
         newMeasurement
       );
     } else {
-      log.info(`Measurement added.`, newMeasurement);
       this.measurements[internalId] = newMeasurement;
       this._broadcastChange(
         this.EVENTS.MEASUREMENT_ADDED,

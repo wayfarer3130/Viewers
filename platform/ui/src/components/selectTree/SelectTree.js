@@ -69,7 +69,11 @@ export class SelectTree extends Component {
     }
   };
 
-  isLeafSelected = item => item && !Array.isArray(item.items);
+  isLeafSelected = item => {
+    const ret = item && !Array.isArray(item.items);
+    console.log('isLeafSelected', ret, item);
+    return ret;
+  };
 
   getLabelClass = item => {
     let labelClass = 'treeLeaf';
@@ -176,12 +180,12 @@ export class SelectTree extends Component {
         currentNode: null,
         value: null,
       });
+      return this.props.onSelected(event, item);
     } else {
       this.setState({
         currentNode: item,
       });
     }
-    return this.props.onSelected(event, item);
   };
 
   onBreadcrumbSelected = () => {

@@ -1,0 +1,75 @@
+[
+  // Change the default configuration to be the hierarchical body part labelling
+  {
+    configName: 'LabellingFlowConfigPoint',
+    extension: {
+      labellingData: 'HierarchicalBodyPartLabellingData',
+    },
+  },
+
+  {
+    configName: 'HierarchicalBodyPartLabellingData',
+    configBase: {
+      items: [
+        {
+          label: 'Head',
+          items: [
+            'Nasal',
+            {
+              value: 'Brain',
+              items: [
+                // A value by itself means that is both the label and value, and has no prefix
+                { value: 'Circle of Willis' },
+                // A label by itself means the value has the prefix added to it
+                { label: 'Left Lobe' },
+                // A simple value is considered a label, so the value has the prefix added.
+                'Right Lobe',
+              ],
+            },
+          ],
+        },
+        'Bone',
+        {
+          label: 'Torso',
+          value: 'Torso',
+          items: [
+            'Breast',
+            'Colon',
+            'Gallbladder',
+            'Kidney',
+            'Liver',
+            'Lung',
+            'Lymph Node',
+            'Mediastinum/Hilum',
+            'Ovary',
+            'Pancreas',
+            'Pelvis',
+            'Peritoneum/Omentum',
+            'Prostate',
+            'Retroperitoneum',
+            'Small Bowel',
+            'Spleen',
+            'Stomach',
+          ],
+        },
+        {
+          value: 'Extremities',
+          items:[
+            "Hands",
+            "Feet",
+            "Legs",
+            "Arms",
+          ],
+        },
+        'Neck',
+        { value: 'Overall Organs',
+          items: [
+            'Muscle',
+            'Other Soft Tissue',
+            'Subcutaneous',
+          ],
+        },
+      ]
+    }
+  },
+]
