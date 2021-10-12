@@ -8,6 +8,7 @@ window.config = {
   enableSearchOnFilterChange: false,
   enableSearchOnEnter: true,
   disableServersCache: true,
+  defaultTheme: 'fuberlin',
   servers: {
     dicomWeb: [
       {

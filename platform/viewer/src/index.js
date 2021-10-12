@@ -49,7 +49,8 @@ if (window) {
   window.ConfigPoint = ConfigPoint;
 
   // Load the default theme settings
-  ConfigPoint.load('theme', '/theme', 'theme');
+  const defaultTheme = config.defaultTheme || 'theme';
+  ConfigPoint.load(defaultTheme, '/theme', 'theme');
 }
 
 const appProps = {

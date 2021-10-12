@@ -1,6 +1,8 @@
 const displayFunction = data => {
   let text = '';
-  text = 'cobbAngle';
+  if (data.rAngle) {
+    text = data.rAngle.toFixed(2) + ' °';
+  }
   return text;
 };
 
