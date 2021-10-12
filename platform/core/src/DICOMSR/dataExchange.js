@@ -74,7 +74,7 @@ const storeMeasurements = async (measurementData, filter, server) => {
     log.error(
       `[DICOMSR] Error while saving the measurements: ${error.message}`
     );
-    throw new Error('Error while saving the measurements.');
+    throw new Error(`Error while saving the measurements to ${server.name} url ${serverUrl}.`);
   }
 };
 

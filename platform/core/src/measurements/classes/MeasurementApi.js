@@ -262,8 +262,8 @@ export default class MeasurementApi {
     });
   }
 
-  storeMeasurements(timepointId) {
-    const { server } = configuration;
+  storeMeasurements(timepointId, server) {
+    if (!server) server = configuration.server;
     const storeFn = configuration.dataExchange.store;
     if (typeof storeFn !== 'function') {
       log.error('Measurement store function has not been configured.');
@@ -845,22 +845,22 @@ export default class MeasurementApi {
 
   /**
    * Batch operation to update multiple measurements at once
-   * @param {Array} measurementList 
+   * @param {Array} measurementList
    */
   updateMeasurements(measurementList = []) {
-    
+
     // update measurements stored into this API
     for(let data of measurementList) {
       const {toolType, measurementData} = data;
       const collection = this.tools[toolType];
-  
+
       const toolIndex = collection.findIndex(
         tool => tool._id === measurementData._id
       );
       if (toolIndex < 0) {
         return;
       }
-  
+
       collection[toolIndex] = Object.assign({}, measurementData);
     }
 

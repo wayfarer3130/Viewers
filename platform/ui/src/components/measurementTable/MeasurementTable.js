@@ -10,6 +10,9 @@ import PropTypes from 'prop-types';
 import { ScrollableArea } from './../../ScrollableArea/ScrollableArea.js';
 import { TableList } from './../tableList';
 import { Tooltip } from './../tooltip';
+import ConfigPoint from 'config-point';
+
+const GUISettings = ConfigPoint.addConfig('GUISettings');
 
 class MeasurementTable extends Component {
   static propTypes = {
@@ -41,6 +44,8 @@ class MeasurementTable extends Component {
   render() {
     const { overallWarnings, saveFunction, t } = this.props;
     const hasOverallWarnings = overallWarnings.warningList.length > 0;
+    const { exportDestinations } = GUISettings.measurements || {};
+
 
     return (
       <div className="measurementTable">
@@ -88,16 +93,28 @@ class MeasurementTable extends Component {
               Save measurements
             </button>
           )}
+          {exportDestinations && exportDestinations.map(otherSave => (
+            <button
+              key={otherSave}
+              onClick={(e) => this.saveFunction(e, otherSave)}
+              className="saveBtn"
+              data-cy="save-measurements-btn"
+            >
+              <Icon name="save" width="14px" height="14px" />
+              Export to {otherSave.name}
+            </button>
+          ))}
         </div>
       </div>
     );
   }
 
-  saveFunction = async event => {
+  saveFunction = async (event, server) => {
     const { saveFunction, onSaveComplete } = this.props;
     if (saveFunction) {
       try {
-        const result = await saveFunction();
+
+        const result = await saveFunction(undefined, server);
         if (onSaveComplete) {
           onSaveComplete({
             title: 'STOW SR',

@@ -212,9 +212,9 @@ function convertTimepointsToTableData(timepoints) {
  */
 function getSaveFunction(serverType) {
   if (serverType === 'dicomWeb') {
-    return () => {
+    return (timepointId, server) => {
       const measurementApi = OHIF.measurements.MeasurementApi.Instance;
-      const promise = measurementApi.storeMeasurements();
+      const promise = measurementApi.storeMeasurements(timepointId, server);
       return promise;
     };
   }

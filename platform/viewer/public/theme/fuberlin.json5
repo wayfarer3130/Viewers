@@ -2,6 +2,14 @@
   GUISettings: {
     measurements: {
       labellingData: 'HierarchicalBodyPartLabellingData',
+      exportDestinations: [
+        {
+          name: 'Export',
+          type: 'dicomWeb',
+          wadoRoot: 'http://localhost:5000',
+          exportMeasurements: true,
+        },
+      ],
     },
   },
 
