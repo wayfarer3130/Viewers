@@ -12,7 +12,11 @@ import { emptyTypeAnnotation } from '@babel/types';
 import { isEmpty } from 'validate.js';
 
 const toItems = (items, prefix = '') => {
-  return items.map(item => {
+  if (!items) return;
+  if (!Array.isArray(items)) {
+    throw Error(`Items ${items} isn't an array`);
+  }
+  return items.filter(item => item).map(item => {
     if (typeof item === 'string') {
       return { label: item, value: `${prefix}${item}` };
     }
@@ -26,14 +30,13 @@ const toItems = (items, prefix = '') => {
   });
 };
 
-export const { LabellingFlowConfigPoint } = ConfigPoint.register(
-  {
-    configName: 'LabellingFlowConfigPoint',
-    configBase: {
+const { GUISettings } = ConfigPoint.register({
+  GUISettings: {
+    measurements: {
       labellingData: 'BodyPartLabellingData',
     },
   },
-);
+});
 
 const LabellingFlow = ({
   measurementData,
@@ -43,7 +46,7 @@ const LabellingFlow = ({
   updateLabelling,
   labellingDoneCallback,
   editDescriptionOnDialog,
-  configPoint = LabellingFlowConfigPoint,
+  configPoint = GUISettings,
 }) => {
   const [fadeOutTimer, setFadeOutTimer] = useState();
   const [showComponent, setShowComponent] = useState(true);
@@ -54,7 +57,7 @@ const LabellingFlow = ({
     editDescription,
     skipAddLabelButton,
   });
-  const labellingItems = ConfigPoint.getConfig(configPoint.labellingData).items;
+  const labellingItems = ConfigPoint.getConfig(configPoint.measurements.labellingData).items;
 
   useEffect(() => {
     const newMeasurementData = cloneDeep(measurementData);

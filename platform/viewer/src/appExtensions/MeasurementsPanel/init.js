@@ -112,9 +112,6 @@ export default function init({
       defaultPosition: _getDefaultPosition(event.detail),
       content: ToolContextMenu,
       contentProps: {
-        contextMenuItems: [
-          { label: 'One' },
-        ],
         eventData: event.detail,
         onDelete: (nearbyToolData, eventData) => {
           const element = eventData.element;

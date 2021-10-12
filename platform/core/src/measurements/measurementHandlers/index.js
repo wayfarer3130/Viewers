@@ -52,7 +52,7 @@ const MeasurementHandlers = {
   onCompleted(event) {
     this.modified(event);
     const eventData = getEventData(event);
-    console.log('measurementHandlers:Completing event', event, eventData);
+    return eventData;
   },
 
   onModified(event) {

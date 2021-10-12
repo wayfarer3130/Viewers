@@ -1,31 +1,40 @@
-[
-  // Change the default configuration to be the hierarchical body part labelling
-  {
-    configName: 'LabellingFlowConfigPoint',
-    extension: {
+{
+  GUISettings: {
+    measurements: {
       labellingData: 'HierarchicalBodyPartLabellingData',
     },
   },
 
-  {
-    configName: 'HierarchicalBodyPartLabellingData',
-    configBase: {
+  BrainLabellingData: {
+    value: 'Brain',
+    items: [
+      // A value by itself means that is both the label and value, and has no prefix
+      { value: 'Circle of Willis' },
+      // A label by itself means the value has the prefix added to it
+      { label: 'Left Lobe' },
+      // A simple value is considered a label, so the value has the prefix added.
+      'Right Lobe',
+    ],
+  },
+
+  HierarchicalBodyPartLabellingData: {
       items: [
         {
           label: 'Head',
           items: [
-            'Nasal',
-            {
-              value: 'Brain',
+            { label: 'Nasal',
               items: [
-                // A value by itself means that is both the label and value, and has no prefix
-                { value: 'Circle of Willis' },
-                // A label by itself means the value has the prefix added to it
-                { label: 'Left Lobe' },
-                // A simple value is considered a label, so the value has the prefix added.
-                'Right Lobe',
-              ],
+                "deviated septum",
+                {
+                  label: 'Polyps',
+                  items: [
+                    "ethmoidal",
+                    "antrochoanal",
+                  ],
+                }
+              ]
             },
+            { configOperation: 'reference', source: 'BrainLabellingData' },
           ],
         },
         'Bone',
@@ -71,5 +80,4 @@
         },
       ]
     }
-  },
-]
+}

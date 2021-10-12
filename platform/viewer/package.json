@@ -61,7 +61,7 @@
     "@ohif/ui": "^1.10.2",
     "@tanem/react-nprogress": "^1.1.25",
     "classnames": "^2.2.6",
-    "config-point": "^0.2.2",
+    "config-point": "^0.2.3",
     "core-js": "^3.2.1",
     "cornerstone-core": "^2.5.0",
     "cornerstone-math": "^0.1.9",
