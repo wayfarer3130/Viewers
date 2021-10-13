@@ -277,15 +277,20 @@ class MeasurementService {
     try {
       const sourceMappings = this.mappings[source.id];
       const { toMeasurementSchema } = sourceMappings.find(
-        mapping => mapping.definition === definition
-      );
+        mapping => mapping && mapping.definition === definition
+      ) || {};
 
+      if (!toMeasurementSchema) {
+        console.log('No toMeasurementSchema for', definition);
+        return;
+      }
       /* Convert measurement */
       measurement = toMeasurementSchema(sourceMeasurement);
 
       /* Assign measurement source instance */
       measurement.source = source;
     } catch (error) {
+      console.log('error=', error);
       log.warn(
         `Failed to map '${sourceInfo}' measurement for definition ${definition}:`,
         error.message

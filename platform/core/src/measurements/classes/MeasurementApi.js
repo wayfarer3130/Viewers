@@ -231,9 +231,6 @@ export default class MeasurementApi {
     return new Promise((resolve, reject) => {
       retrievalFn(server).then(measurementData => {
         if (measurementData) {
-          log.info('Measurement data retrieval');
-          log.info(measurementData);
-
           Object.keys(measurementData).forEach(measurementTypeId => {
             const measurements = measurementData[measurementTypeId];
 

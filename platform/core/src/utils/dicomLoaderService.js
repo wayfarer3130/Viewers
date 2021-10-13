@@ -50,6 +50,10 @@ const fetchIt = (url, headers = DICOMWeb.getAuthorizationHeader()) => {
 };
 
 const cornerstoneRetriever = imageId => {
+  if (!imageId) {
+    throw new Error(`cornerstoneRetriever imageId must not be undefined`);
+  }
+
   return cornerstone.loadAndCacheImage(imageId).then(image => {
     return image && image.data && image.data.byteArray.buffer;
   });
