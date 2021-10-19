@@ -45,6 +45,7 @@ export default class EditDescriptionDialog extends Component {
           autoFocus
           onChange={this.handleChange}
         />
+        {this.props.children}
       </SimpleDialog>
     );
   }

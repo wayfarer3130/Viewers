@@ -3,9 +3,9 @@ import cornerstone from 'cornerstone-core';
 import csTools from 'cornerstone-tools';
 import throttle from 'lodash.throttle';
 
-
 import LabellingFlow from '../../components/Labelling/LabellingFlow';
 import ToolContextMenu from '../../connectedComponents/ToolContextMenu';
+import { useAppContext } from '../../context/AppContext';
 
 const {
   onAdded,
@@ -99,6 +99,7 @@ export default function init({
 
   const onRightClick = event => {
     console.log("onRightClick");
+
     if (!UIDialogService) {
       console.warn('Unable to show dialog; no UI Dialog Service available.');
       return;

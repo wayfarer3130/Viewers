@@ -13,6 +13,7 @@ import {
   SET_USER_PREFERENCES,
   SET_MEASUREMENTS,
   SET_ACTIVE_MEASUREMENTS,
+  SET_CURRENT_LABEL,
 } from './constants/ActionTypes.js';
 
 /**
@@ -132,6 +133,11 @@ export const setServers = servers => ({
   servers,
 });
 
+export const setCurrentLabel = label => ({
+  type: SET_CURRENT_LABEL,
+  label,
+});
+
 const actions = {
   /**
    * VIEWPORT
@@ -154,6 +160,7 @@ const actions = {
   setActiveMeasurements,
   setStudyData,
   setServers,
+  setCurrentLabel,
 };
 
 export default actions;

@@ -134,12 +134,19 @@ class MeasurementTable extends Component {
     }
   };
 
+  onHeaderClick(event, measureGroup) {
+    if (this.props.dispatchCurrentLabel) {
+      this.props.dispatchCurrentLabel(event, measureGroup.groupId);
+    }
+  }
+
   getMeasurementsGroups = () => {
     return this.props.measurementCollection.map((measureGroup, index) => {
       return (
         <TableList
           key={index}
           customHeader={this.getCustomHeader(measureGroup)}
+          onHeaderClick={(evt) => this.onHeaderClick(evt, measureGroup)}
         >
           {this.getMeasurements(measureGroup)}
         </TableList>

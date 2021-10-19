@@ -1,3 +1,4 @@
+import ConfigPoint from 'config-point';
 import { allTools } from './toolGroups/allTools';
 import {
   retrieveMeasurements,
@@ -9,20 +10,25 @@ import {
   disassociateStudy,
 } from './dataExchange';
 
+const { MeasurementToolsConfigPoint } = ConfigPoint.register({
+  MeasurementToolsConfigPoint: {
+    measurementTools: [allTools],
+    newLesions: [
+      {
+        id: 'newTargets',
+        name: 'New Targets',
+        toolGroupId: 'targets',
+      },
+      {
+        id: 'newNonTargets',
+        name: 'New Non-Targets',
+        toolGroupId: 'nonTargets',
+      },
+    ],
+  },
+});
+
 const measurementApiDefaultConfig = {
-  measurementTools: [allTools],
-  newLesions: [
-    {
-      id: 'newTargets',
-      name: 'New Targets',
-      toolGroupId: 'targets',
-    },
-    {
-      id: 'newNonTargets',
-      name: 'New Non-Targets',
-      toolGroupId: 'nonTargets',
-    },
-  ],
   dataExchange: {
     retrieve: retrieveMeasurements,
     store: storeMeasurements,
@@ -39,4 +45,7 @@ const timepointApiDefaultConfig = {
   },
 };
 
-export { measurementApiDefaultConfig, timepointApiDefaultConfig };
+export {
+  measurementApiDefaultConfig, timepointApiDefaultConfig,
+  MeasurementToolsConfigPoint,
+};

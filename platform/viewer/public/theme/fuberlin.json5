@@ -4,9 +4,9 @@
       labellingData: 'HierarchicalBodyPartLabellingData',
       exportDestinations: [
         {
-          name: 'Export',
+          name: 'Download',
           type: 'dicomWeb',
-          wadoRoot: 'http://localhost:5000',
+          wadoRoot: 'saveDicom',
           exportMeasurements: true,
         },
       ],

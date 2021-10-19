@@ -9,12 +9,24 @@ export class TableList extends Component {
     defaultItems: PropTypes.object,
     children: PropTypes.node.isRequired,
     headerTitle: PropTypes.string,
+    onHeaderClick: PropTypes.func,
     headless: PropTypes.bool,
   };
 
   static defaultProps = {
     headless: false,
   };
+
+  constructor(props) {
+    super(props);
+    this.onHeaderClick = this.onHeaderClick.bind(this);
+  }
+
+  onHeaderClick(event) {
+    if (this.props.onHeaderClick) {
+      this.props.onHeaderClick(this, event);
+    }
+  }
 
   render() {
     return (

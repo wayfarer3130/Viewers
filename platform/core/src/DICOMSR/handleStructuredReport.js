@@ -46,6 +46,20 @@ const retrieveMeasurementFromSR = async (series, studies, serverUrl) => {
   return measurementsData;
 };
 
+const saveByteArray = (function () {
+  var a = document.createElement("a");
+  document.body.appendChild(a);
+  a.style = "display: none";
+  return function (data, name) {
+    var blob = new Blob([data], { type: "octet/stream" }),
+      url = window.URL.createObjectURL(blob);
+    a.href = url;
+    a.download = name;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+}());
+
 /**
  * Function to store measurements to DICOM Structured Reports in determined server
  *
@@ -71,6 +85,11 @@ const stowSRFromMeasurements = async (measurements, serverUrl) => {
   dicomDict.dict = DicomMetaDictionary.denaturalizeDataset(dataset);
 
   const part10Buffer = dicomDict.write();
+
+  if (serverUrl === 'saveDicom') {
+    saveByteArray(part10Buffer, `sr-${dicomDict.dict["00080018"].Value[0]}.dcm`);
+    return;
+  }
 
   const config = {
     url: serverUrl,

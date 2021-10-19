@@ -7,6 +7,7 @@ import cornerstone from 'cornerstone-core';
 import jumpToRowItem from './jumpToRowItem.js';
 
 const { setViewportSpecificData, setActiveMeasurements } = OHIF.redux.actions;
+const { setCurrentLabel } = OHIF.redux.actions;
 const { MeasurementApi } = OHIF.measurements;
 
 /**
@@ -165,7 +166,11 @@ function convertMeasurementsToTableData(toolCollections, timepoints) {
       };
 
       // find the group object for the tool
-      const toolGroupMeasurements = tableMeasurements.find(group => {
+      const toolGroupMeasurements =
+        tableMeasurements.find(group => {
+          return tableMeasurement.label.indexOf(group.groupId) == 0;
+        })
+        || tableMeasurements.find(group => {
         return group.groupId === tool.toolGroup;
       });
       // inject the new measurement for this measurementNumer
@@ -222,7 +227,7 @@ function getSaveFunction(serverType) {
 
 const mapStateToProps = state => {
   const { timepointManager, servers } = state;
-  const { timepoints, measurements } = timepointManager;
+  const { timepoints, measurements, currentLabel } = timepointManager;
   const activeServer = servers.servers.find(a => a.active === true);
   const saveFunction = getSaveFunction(activeServer.type);
 
@@ -235,11 +240,16 @@ const mapStateToProps = state => {
     timepointManager: state.timepointManager,
     viewports: state.viewports,
     saveFunction,
+    currentLabel,
   };
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
+    dispatchCurrentLabel: (event, newLabel) => {
+      dispatch(setCurrentLabel(newLabel));
+    },
+
     dispatchRelabel: (event, measurementData, viewportsState) => {
       event.persist();
 

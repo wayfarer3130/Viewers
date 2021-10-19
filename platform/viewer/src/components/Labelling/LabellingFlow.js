@@ -30,6 +30,11 @@ const toItems = (items, prefix = '') => {
   });
 };
 
+/**
+ * Allow configuring GUISettings.measurements.labellingData to point to a
+ * custom ConfigPoint theme value of the given name.  The default here
+ * points to 'BodyPartLabellingData' defined in OHIFLabellingData.js
+ */
 const { GUISettings } = ConfigPoint.register({
   GUISettings: {
     measurements: {
@@ -37,6 +42,20 @@ const { GUISettings } = ConfigPoint.register({
     },
   },
 });
+
+/** Finds the node containing the specified value, as a "tree" node, that is,
+ * not the child elements, but the parent value containing it if it isn't a child element itself.
+ */
+const findNode = (node, location, props) => {
+  if (!node || !location) return;
+  const { items } = node;
+  if (!items) return;
+  for (const item of items) {
+    if (item.value === location) return item.items && item || node;
+    const subItem = findNode(item, location, props);
+    if (subItem) return subItem;
+  }
+};
 
 const LabellingFlow = ({
   measurementData,
@@ -48,6 +67,7 @@ const LabellingFlow = ({
   editDescriptionOnDialog,
   configPoint = GUISettings,
 }) => {
+  const initialLocation = measurementData.location;
   const [fadeOutTimer, setFadeOutTimer] = useState();
   const [showComponent, setShowComponent] = useState(true);
   const descriptionInput = useRef();
@@ -58,6 +78,8 @@ const LabellingFlow = ({
     skipAddLabelButton,
   });
   const labellingItems = ConfigPoint.getConfig(configPoint.measurements.labellingData).items;
+  const descriptionPoint = ConfigPoint.getConfig(configPoint.measurements.descriptionData);
+  const descriptionItems = descriptionPoint && descriptionPoint.items || undefined;
 
   useEffect(() => {
     const newMeasurementData = cloneDeep(measurementData);
@@ -119,10 +141,16 @@ const LabellingFlow = ({
     }));
   };
 
+
+  const selectDescriptionTreeSelectCallback = (event, itemSelected) => {
+    const description = itemSelected.value;
+    const descriptionLabel = itemSelected.label;
+    descriptionDialogUpdate(description);
+  };
+
   const selectTreeSelectCallback = (event, itemSelected) => {
     const location = itemSelected.value;
     const locationLabel = itemSelected.label;
-    console.log("Select tree callback", location);
     updateLabelling({ location });
 
     setState(state => ({
@@ -181,10 +209,13 @@ const LabellingFlow = ({
       );
     } else {
       if (editLocation) {
+        const computedItems = toItems(labellingItems);
+        const currentNode = findNode({ value: '', items: computedItems }, initialLocation);
         return (
           <SelectTree
-            items={toItems(labellingItems)}
+            items={computedItems}
             columns={1}
+            currentNode={currentNode}
             onSelected={selectTreeSelectCallback}
             selectTreeFirstTitle="Assign Label"
           />
@@ -247,12 +278,22 @@ const LabellingFlow = ({
   };
 
   if (editDescriptionOnDialog) {
+    const computedItems = toItems(descriptionItems);
+    const currentNode = findNode({ value: '', items: computedItems }, initialLocation);
     return (
       <EditDescriptionDialog
         onCancel={labellingDoneCallback}
         onUpdate={descriptionDialogUpdate}
         measurementData={state.measurementData}
-      />
+      >
+        {computedItems && (<SelectTree
+          items={computedItems}
+          columns={1}
+          currentNode={currentNode}
+          onSelected={selectDescriptionTreeSelectCallback}
+          selectTreeFirstTitle="Description"
+        />)}
+      </EditDescriptionDialog>
     );
   }
 
@@ -282,6 +323,7 @@ LabellingFlow.propTypes = {
   initialTopDistance: PropTypes.number,
   skipAddLabelButton: PropTypes.bool,
   editLocation: PropTypes.bool,
+  editGroup: PropTypes.bool,
   editDescription: PropTypes.bool,
   editDescriptionOnDialog: PropTypes.bool,
 };
@@ -291,6 +333,7 @@ LabellingFlow.defaultProps = {
   editLocation: false,
   editDescription: false,
   editDescriptionOnDialog: false,
+  editGroup: false,
 };
 
 export default LabellingFlow;

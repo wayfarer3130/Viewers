@@ -29,6 +29,8 @@ const mapStateToProps = (state, ownProps) => {
     dataFromStore = state.extensions.cornerstone;
   }
 
+  console.log('Connected cornerstone viewport', state);
+
   // If this is the active viewport, enable prefetching.
   const { viewportIndex } = ownProps; //.viewportData;
   const isActive = viewportIndex === state.viewports.activeViewportIndex;
@@ -91,6 +93,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     },
 
     onMeasurementsChanged: (event, action) => {
+      console.log('onMeasurementsChanged', action);
       return MEASUREMENT_ACTION_MAP[action](event);
     },
   };

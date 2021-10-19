@@ -33,8 +33,8 @@ export class SelectTree extends Component {
     super(props);
 
     this.state = {
-      searchTerm: null,
-      currentNode: null,
+      searchTerm: props.searchTerm,
+      currentNode: props.currentNode,
       value: null,
     };
   }

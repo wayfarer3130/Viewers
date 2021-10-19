@@ -6,10 +6,16 @@ import getDescription from '../lib/getDescription';
 import getImageIdForImagePath from '../lib/getImageIdForImagePath';
 import guid from '../../utils/guid';
 import studyMetadataManager from '../../utils/studyMetadataManager';
-import { measurementApiDefaultConfig } from './../configuration.js';
+import { measurementApiDefaultConfig, MeasurementToolsConfigPoint } from './../configuration.js';
 
 const configuration = {
   ...measurementApiDefaultConfig,
+  get measurementTools() {
+    return MeasurementToolsConfigPoint.measurementTools;
+  },
+  get newLesions() {
+    return MeasurementToolsConfigPoint.newLesions;
+  },
 };
 
 export default class MeasurementApi {
@@ -34,6 +40,7 @@ export default class MeasurementApi {
    * @memberof MeasurementApi
    */
   static setConfiguration(config) {
+    console.log("MeasurementAPI set configuration", config, configuration);
     Object.assign(configuration, config);
   }
 
