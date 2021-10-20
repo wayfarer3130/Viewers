@@ -19,6 +19,7 @@ export default class InputRadio extends Component {
         className={'wrapperLabel radioLabel ' + labelClass}
         htmlFor={this.props.id}
       >
+        {this.props.children}
         <input
           type="radio"
           id={this.props.id}

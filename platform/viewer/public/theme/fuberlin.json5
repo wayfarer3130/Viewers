@@ -47,7 +47,17 @@
         },
         {
           value: 'Bone',
-          select: 'measurementData.toolType==="CobbAngle"',
+
+          // Example for how to select a child menu via configuration items
+          select: 'measurementData.toolType==="CobbAngle" && metadata.Modality==="CR" && false',
+
+          // Example item for how to define a findingSite location
+          findingSite: {
+            CodeValue: '272673000',
+            CodingSchemeDesignator: 'SCT',
+            CodeMeaning: 'Bone',
+          },
+
           items: [
             'femur',
             'ankle',

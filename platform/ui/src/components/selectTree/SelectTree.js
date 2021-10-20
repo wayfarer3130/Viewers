@@ -71,7 +71,6 @@ export class SelectTree extends Component {
 
   isLeafSelected = item => {
     const ret = item && !Array.isArray(item.items);
-    console.log('isLeafSelected', ret, item);
     return ret;
   };
 
@@ -133,7 +132,13 @@ export class SelectTree extends Component {
           label={item.label}
           labelClass={this.getLabelClass(item)}
           onSelected={this.onSelected}
-        />
+        >
+          {!this.isLeafSelected(item) && (<Icon
+            name="circle-o"
+            className="expandIcon"
+            onClick={(evt) => this.onSelected(evt, item, true)}
+          />)}
+        </InputRadio>
       );
     });
   }
@@ -173,8 +178,8 @@ export class SelectTree extends Component {
     });
   };
 
-  onSelected = (event, item) => {
-    if (this.isLeafSelected(item)) {
+  onSelected = (event, item, expand) => {
+    if (this.isLeafSelected(item) || !expand) {
       this.setState({
         searchTerm: null,
         currentNode: null,

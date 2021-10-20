@@ -87,6 +87,7 @@ export default function init({
       content: LabellingFlow,
       contentProps: {
         measurementData,
+        ...props.studyInfo,
         labellingDoneCallback: () =>
           UIDialogService.dismiss({ id: 'labelling' }),
         updateLabelling: labellingData =>
@@ -123,16 +124,16 @@ export default function init({
           });
         },
         onClose: () => UIDialogService.dismiss({ id: 'context-menu' }),
-        onSetLabel: (eventData, measurementData) => {
+        onSetLabel: (eventData, measurementData, studyInfo) => {
           showLabellingDialog(
-            { centralize: true, isDraggable: false },
+            { centralize: true, isDraggable: false, studyInfo, eventData },
             { skipAddLabelButton: true, editLocation: true },
             measurementData
           );
         },
-        onSetDescription: (eventData, measurementData) => {
+        onSetDescription: (eventData, measurementData, studyInfo) => {
           showLabellingDialog(
-            { defaultPosition: _getDefaultPosition(eventData) },
+            { defaultPosition: _getDefaultPosition(eventData), studyInfo, eventData },
             { editDescriptionOnDialog: true },
             measurementData
           );

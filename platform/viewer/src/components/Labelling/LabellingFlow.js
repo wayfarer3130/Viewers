@@ -167,7 +167,8 @@ const LabellingFlow = (props) => {
     const location = itemSelected.value;
     const locationLabel = itemSelected.label;
     const description = itemSelected.description;
-    updateLabelling({ location, description });
+    const { finding = [], findingSite = [] } = itemSelected;
+    updateLabelling({ location, description, finding, findingSite });
 
     setState(state => ({
       ...state,
@@ -176,6 +177,9 @@ const LabellingFlow = (props) => {
         ...state.measurementData,
         location,
         locationLabel,
+        description,
+        finding,
+        findingSite,
       },
     }));
   };
@@ -192,8 +196,10 @@ const LabellingFlow = (props) => {
    * Waits for 1 sec to dismiss the labelling component.
    *
    */
-  const fadeOutAndLeave = () =>
+  const fadeOutAndLeave = () => {
+    console.log('Fade out and')
     setFadeOutTimer(setTimeout(fadeOutAndLeaveFast, 1000));
+  };
 
   const fadeOutAndLeaveFast = () => setShowComponent(false);
 
@@ -211,7 +217,7 @@ const LabellingFlow = (props) => {
 
   const labellingStateFragment = () => {
     const { skipAddLabelButton, editLocation, measurementData } = state;
-    const { description, locationLabel, location } = measurementData;
+    const { description, location } = measurementData;
 
     if (!skipAddLabelButton) {
       return (

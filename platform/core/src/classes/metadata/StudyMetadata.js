@@ -657,6 +657,28 @@ class StudyMetadata extends Metadata {
     }, 0);
   }
 
+  /** Finds a given instance object
+   *  @returns the display set, and the instance metadata
+   */
+  getInstance(sopInstanceUID, frameIndex) {
+    if (!sopInstanceUID) return;
+    let image;
+    const displaySet = this.findDisplaySet(ds => {
+      return (
+        ds.images &&
+        ds.images.find(i => {
+          if (i.getSOPInstanceUID() === sopInstanceUID) {
+            image = i;
+            // TODO - check frameIndex
+            return true;
+          }
+        })
+      )
+    });
+    if (!image) return;
+    return { study: this, displaySet, image, metadata: image.getData().metadata };
+  }
+
   /**
    * Invokes the supplied callback for each series in the current study passing
    * two arguments: series (a SeriesMetadata instance) and index (the integer

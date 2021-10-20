@@ -276,14 +276,7 @@ const commandsModule = ({ servicesManager }) => {
       activeViewportIndex,
       refreshViewports = true,
     }) => {
-      const study = studyMetadataManager.get(StudyInstanceUID);
-
-      const displaySet = study.findDisplaySet(ds => {
-        return (
-          ds.images &&
-          ds.images.find(i => i.getSOPInstanceUID() === SOPInstanceUID)
-        );
-      });
+      const { displaySet } = studyMetadataManager.getInstance(StudyInstanceUID, SOPInstanceUID, frameIndex);
 
       if (!displaySet) {
         return;

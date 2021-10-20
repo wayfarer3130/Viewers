@@ -3,6 +3,9 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import ViewportContextMenu from '../components/ViewportGrid/ViewportContextMenu.js';
 import { commandsManager } from './../App.js';
+import OHIF from '@ohif/core';
+
+const { studyMetadataManager } = OHIF.utils;
 
 const toolTypes = [
   'Angle',
@@ -35,9 +38,9 @@ const ToolContextMenu = (props) => {
     {
       label: 'Relabel',
       actionType: 'setLabel',
-      action: ({ nearbyToolData, eventData }) => {
+      action: ({ nearbyToolData, eventData, studyInfo }) => {
         const { tool: measurementData } = nearbyToolData;
-        onSetLabel(eventData, measurementData);
+        onSetLabel(eventData, measurementData, studyInfo);
       },
     },
     {
@@ -70,8 +73,11 @@ const ToolContextMenu = (props) => {
 
     let dropdownItems = [];
     if (nearbyToolData) {
+      const { tool } = nearbyToolData;
+      const studyInfo = tool &&
+        studyMetadataManager.getInstance(tool.StudyInstanceUID, tool.SOPInstanceUID, tool.frameIndex);
       defaultDropdownItems.forEach(item => {
-        item.params = { eventData, nearbyToolData };
+        item.params = { eventData, nearbyToolData, studyInfo };
 
         if (item.actionType === 'setDescription') {
           item.label = `${
