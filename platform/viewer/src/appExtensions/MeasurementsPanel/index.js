@@ -39,7 +39,7 @@ export default {
             UIDialogService.dismiss({ id: 'labelling' }),
           updateLabelling: ({ location, description, response }) => {
             measurementData.location = location || measurementData.location;
-            measurementData.description = description || '';
+            measurementData.description = description || measurementData.description;
             measurementData.response = response || measurementData.response;
 
             commandsManager.runCommand(

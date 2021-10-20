@@ -4,12 +4,10 @@ import PropTypes from 'prop-types';
 import cloneDeep from 'lodash.clonedeep';
 
 import LabellingTransition from './LabellingTransition.js';
-import ConfigPoint from 'config-point';
+import { ConfigPoint, safeFunction } from 'config-point';
 import './OHIFLabellingData';
 import EditDescriptionDialog from './../EditDescriptionDialog/EditDescriptionDialog.js';
 import './LabellingFlow.css';
-import { emptyTypeAnnotation } from '@babel/types';
-import { isEmpty } from 'validate.js';
 
 const toItems = (items, prefix = '') => {
   if (!items) return;
@@ -25,6 +23,9 @@ const toItems = (items, prefix = '') => {
     if (!item.label) ret.label = ret.value;
     if (item.items) {
       ret.items = toItems(item.items, ret.value + ">");
+    }
+    if (item.select) {
+      ret.selectFunc = safeFunction(item.select);
     }
     return ret;
   });
@@ -47,26 +48,40 @@ const { GUISettings } = ConfigPoint.register({
  * not the child elements, but the parent value containing it if it isn't a child element itself.
  */
 const findNode = (node, location, props) => {
-  if (!node || !location) return;
+  if (!node) return;
   const { items } = node;
   if (!items) return;
   for (const item of items) {
-    if (item.value === location) return item.items && item || node;
+    if (item.selectFunc) {
+      try {
+        if (item.selectFunc(props)) {
+
+          return item.items && item || node;
+        }
+      } catch (e) {
+        console.log('Calling selectFunc', item.select, 'on', props, 'failed');
+      }
+    } else if (item.value === location) {
+      return item.items && item || node;
+    }
     const subItem = findNode(item, location, props);
-    if (subItem) return subItem;
+    if (subItem) {
+      return subItem;
+    }
   }
 };
 
-const LabellingFlow = ({
-  measurementData,
-  editLocation,
-  editDescription,
-  skipAddLabelButton,
-  updateLabelling,
-  labellingDoneCallback,
-  editDescriptionOnDialog,
-  configPoint = GUISettings,
-}) => {
+const LabellingFlow = (props) => {
+  const {
+    measurementData,
+    editLocation,
+    editDescription,
+    skipAddLabelButton,
+    updateLabelling,
+    labellingDoneCallback,
+    editDescriptionOnDialog,
+    configPoint = GUISettings,
+  } = props;
   const initialLocation = measurementData.location;
   const [fadeOutTimer, setFadeOutTimer] = useState();
   const [showComponent, setShowComponent] = useState(true);
@@ -151,7 +166,8 @@ const LabellingFlow = ({
   const selectTreeSelectCallback = (event, itemSelected) => {
     const location = itemSelected.value;
     const locationLabel = itemSelected.label;
-    updateLabelling({ location });
+    const description = itemSelected.description;
+    updateLabelling({ location, description });
 
     setState(state => ({
       ...state,
@@ -210,7 +226,8 @@ const LabellingFlow = ({
     } else {
       if (editLocation) {
         const computedItems = toItems(labellingItems);
-        const currentNode = findNode({ value: '', items: computedItems }, initialLocation);
+        const currentNode = findNode({ label: 'Root', value: '', items: computedItems }, initialLocation, props);
+
         return (
           <SelectTree
             items={computedItems}
@@ -279,7 +296,7 @@ const LabellingFlow = ({
 
   if (editDescriptionOnDialog) {
     const computedItems = toItems(descriptionItems);
-    const currentNode = findNode({ value: '', items: computedItems }, initialLocation);
+    const currentNode = findNode({ value: '', items: computedItems }, initialLocation, props);
     return (
       <EditDescriptionDialog
         onCancel={labellingDoneCallback}

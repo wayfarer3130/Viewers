@@ -12,6 +12,7 @@ const toolTypes = [
   'EllipticalRoi',
   'CircleRoi',
   'RectangleRoi',
+  'CobbAngle',
 ];
 
 const ToolContextMenu = (props) => {

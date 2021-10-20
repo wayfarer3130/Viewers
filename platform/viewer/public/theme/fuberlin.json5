@@ -45,7 +45,14 @@
             { configOperation: 'reference', source: 'BrainLabellingData' },
           ],
         },
-        'Bone',
+        {
+          value: 'Bone',
+          select: 'measurementData.toolType==="CobbAngle"',
+          items: [
+            'femur',
+            'ankle',
+          ],
+          },
         {
           label: 'Torso',
           value: 'Torso',
