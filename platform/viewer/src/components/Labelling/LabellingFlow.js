@@ -15,11 +15,11 @@ const toItems = (items, parent = {}) => {
     throw Error(`Items ${items} isn't an array`);
   }
   return items.filter(item => item).map(item => {
+    const { findingSite, value = '' } = parent;
+    const prefix = value && `${value} >` || '';
     if (typeof item === 'string') {
       return { label: item, value: `${prefix}${item}` };
     }
-    const { findingSite, value = '' } = parent;
-    const prefix = value && `${value} >` || '';
     const ret = { ...item };
     if (!item.value) {
       if (findingSite && !item.findingSite) {
