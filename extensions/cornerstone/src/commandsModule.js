@@ -180,6 +180,8 @@ const commandsModule = ({ servicesManager }) => {
       measurementNumber,
       location,
       description,
+      finding,
+      findingSites,
     }) {
       // Update all measurements by measurement number
       const measurementApi = OHIF.measurements.MeasurementApi.Instance;
@@ -190,6 +192,8 @@ const commandsModule = ({ servicesManager }) => {
       measurements.forEach(measurement => {
         measurement.location = location;
         measurement.description = description;
+        measurement.finding = finding;
+        measurement.findingSites = findingSites;
 
         measurementApi.updateMeasurement(measurement.toolType, measurement);
       });

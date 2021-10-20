@@ -9,7 +9,7 @@ import './OHIFLabellingData';
 import EditDescriptionDialog from './../EditDescriptionDialog/EditDescriptionDialog.js';
 import './LabellingFlow.css';
 
-const toItems = (items, prefix = '') => {
+const toItems = (items, parent = {}) => {
   if (!items) return;
   if (!Array.isArray(items)) {
     throw Error(`Items ${items} isn't an array`);
@@ -18,14 +18,25 @@ const toItems = (items, prefix = '') => {
     if (typeof item === 'string') {
       return { label: item, value: `${prefix}${item}` };
     }
+    const { findingSite, value = '' } = parent;
+    const prefix = value && `${value} >` || '';
     const ret = { ...item };
-    if (!item.value) ret.value = `${prefix}${item.label} `;
-    if (!item.label) ret.label = ret.value;
-    if (item.items) {
-      ret.items = toItems(item.items, ret.value + ">");
+    if (!item.value) {
+      if (findingSite && !item.findingSite) {
+        ret.findingSite = findingSite;
+      }
+      ret.value =
+        ret.findingSite && ret.findingSite.CodeMeaning ||
+        item.label && `${prefix}${item.label}` ||
+        value;
     }
+    if (!item.label) ret.label = item.description || item.value;
+
     if (item.select) {
       ret.selectFunc = safeFunction(item.select);
+    }
+    if (item.items) {
+      ret.items = toItems(item.items, ret);
     }
     return ret;
   });
@@ -163,11 +174,12 @@ const LabellingFlow = (props) => {
     descriptionDialogUpdate(description);
   };
 
-  const selectTreeSelectCallback = (event, itemSelected) => {
-    const location = itemSelected.value;
-    const locationLabel = itemSelected.label;
-    const description = itemSelected.description;
-    const { finding = [], findingSite = [] } = itemSelected;
+  const selectTreeSelectCallback = (event, item) => {
+    const location = item.value;
+    const locationLabel = item.label;
+    const description = item.description;
+    const { findingSite, finding } = item;
+
     updateLabelling({ location, description, finding, findingSite });
 
     setState(state => ({

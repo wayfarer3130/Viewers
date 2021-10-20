@@ -54,14 +54,33 @@ export default function init({
     y: (event && event.currentPoints.client.y) || 0,
   });
 
+  const asArray = val => Array.isArray(val) && val || val && [val];
+
   const _updateLabellingHandler = (labellingData, measurementData) => {
-    const { location, description, response } = labellingData;
+    const { location, locationLabel, description, response, } = labellingData;
+    measurementData.findingSites = asArray(labellingData.findingSite) ||
+      location && [{
+        CodeValue: location,
+        CodingSchemeDesignator: 'OHIF',
+        CodeMeaning: !description && locationLabel || location,
+      }] ||
+      measurementData.findingSites;
 
-    if (location) {
-      measurementData.location = location;
-    }
+    measurementData.finding = labellingData.finding ||
+      description && {
+        CodeValue: description,
+        CodingSchemeDesignator: 'OHIF',
+        CodeMeaning: description,
+      } ||
+      measurementData.finding;
 
-    measurementData.description = description || '';
+    measurementData.location = location ||
+      measurementData.findingSites && measurementData.findingSites[0].CodeValue ||
+      measurementData.location;
+
+    measurementData.description = description ||
+      measurementData.finding && measurementData.finding.CodeValue ||
+      measurementData.description;
 
     if (response) {
       measurementData.response = response;
