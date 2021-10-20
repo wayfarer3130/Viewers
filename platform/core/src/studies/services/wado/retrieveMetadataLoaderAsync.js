@@ -176,12 +176,14 @@ export default class RetrieveMetadataLoaderAsync extends RetrieveMetadataLoader 
     seriesDataNaturalized.forEach((series, idx) => {
       const SeriesDescription = Array.isArray(series.SeriesDescription) ?
         '' : series.SeriesDescription;
-      const { SeriesInstanceUID } = series;
+      const { SeriesInstanceUID, SeriesDate, SeriesTime } = series;
       const seriesDataFromQIDO = {
         SeriesInstanceUID,
         SeriesDescription,
         SeriesNumber: series.SeriesNumber,
         Modality: series.Modality,
+        SeriesDate,
+        SeriesTime,
       };
 
       if (!study.seriesMap) {

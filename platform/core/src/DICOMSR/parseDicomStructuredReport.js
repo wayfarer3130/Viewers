@@ -29,8 +29,10 @@ const parseDicomStructuredReport = (part10SRArrayBuffer, displaySets) => {
     storedMeasurementByToolType = MeasurementReport.generateToolState(dataset);
   } catch (error) {
     const seriesDescription = dataset.SeriesDescription || '';
+    const title = `Failed to parse ${seriesDescription} measurement report`;
+    console.log(title, error);
     LogManager.publish(LogManager.EVENTS.OnLog, {
-      title: `Failed to parse ${seriesDescription} measurement report`,
+      title,
       type: 'warning',
       message: error.message || '',
       notify: true,

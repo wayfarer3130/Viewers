@@ -43,15 +43,19 @@ const parseMeasurementsData = measurementsData => {
       `[DICOMSR] Tooltypes not supported: ${unsupportedTools.join(', ')}`
     );
   }
+  try {
+    const report = MeasurementReport.generateReport(
+      toolState,
+      cornerstone.metaData
+    );
 
-  const report = MeasurementReport.generateReport(
-    toolState,
-    cornerstone.metaData
-  );
+    return {
+      dataset: report.dataset,
+    };
+  } catch (e) {
+    console.warn('Caught error generating report', e);
+  }
 
-  return {
-    dataset: report.dataset,
-  };
 };
 
 export default parseMeasurementsData;
