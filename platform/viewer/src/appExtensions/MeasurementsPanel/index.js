@@ -1,8 +1,7 @@
 import React from 'react';
 import ConnectedMeasurementTable from './ConnectedMeasurementTable.js';
 import init from './init.js';
-
-import LabellingFlow from '../../components/Labelling/LabellingFlow';
+import showLabellingDialogUnbound from './showLabellingDialog.js';
 
 export default {
   /**
@@ -20,37 +19,7 @@ export default {
   getPanelModule({ servicesManager, commandsManager }) {
     const { UINotificationService, UIDialogService } = servicesManager.services;
 
-    const showLabellingDialog = (props, measurementData) => {
-      if (!UIDialogService) {
-        console.warn('Unable to show dialog; no UI Dialog Service available.');
-        return;
-      }
-
-      UIDialogService.dismiss({ id: 'labelling' });
-      UIDialogService.create({
-        id: 'labelling',
-        centralize: true,
-        isDraggable: false,
-        showOverlay: true,
-        content: LabellingFlow,
-        contentProps: {
-          measurementData,
-          labellingDoneCallback: () =>
-            UIDialogService.dismiss({ id: 'labelling' }),
-          updateLabelling: ({ location, description, response }) => {
-            measurementData.location = location || measurementData.location;
-            measurementData.description = description || measurementData.description;
-            measurementData.response = response || measurementData.response;
-
-            commandsManager.runCommand(
-              'updateTableWithNewMeasurementData',
-              measurementData
-            );
-          },
-          ...props,
-        },
-      });
-    };
+    const showLabellingDialog = showLabellingDialogUnbound.bind(null, commandsManager, UIDialogService, {});
 
     const ExtendedConnectedMeasurementTable = () => (
       <ConnectedMeasurementTable

@@ -5,7 +5,7 @@ import throttle from 'lodash.throttle';
 
 import LabellingFlow from '../../components/Labelling/LabellingFlow';
 import ToolContextMenu from '../../connectedComponents/ToolContextMenu';
-import { useAppContext } from '../../context/AppContext';
+import showLabellingDialogUnbound from './showLabellingDialog.js';
 
 const {
   onAdded,
@@ -54,68 +54,7 @@ export default function init({
     y: (event && event.currentPoints.client.y) || 0,
   });
 
-  const asArray = val => Array.isArray(val) && val || val && [val];
-
-  const _updateLabellingHandler = (labellingData, measurementData) => {
-    const { location, locationLabel, description, response, } = labellingData;
-    measurementData.findingSites = asArray(labellingData.findingSite) ||
-      location && [{
-        CodeValue: location,
-        CodingSchemeDesignator: 'OHIF',
-        CodeMeaning: !description && locationLabel || location,
-      }] ||
-      measurementData.findingSites;
-
-    measurementData.finding = labellingData.finding ||
-      description && {
-        CodeValue: description,
-        CodingSchemeDesignator: 'OHIF',
-        CodeMeaning: description,
-      } ||
-      measurementData.finding;
-
-    measurementData.location = location ||
-      measurementData.findingSites && measurementData.findingSites[0].CodeValue ||
-      measurementData.location;
-
-    measurementData.description = description ||
-      measurementData.finding && measurementData.finding.CodeValue ||
-      measurementData.description;
-
-    if (response) {
-      measurementData.response = response;
-    }
-
-    commandsManager.runCommand(
-      'updateTableWithNewMeasurementData',
-      measurementData
-    );
-  };
-
-  const showLabellingDialog = (props, contentProps, measurementData) => {
-    if (!UIDialogService) {
-      console.warn('Unable to show dialog; no UI Dialog Service available.');
-      return;
-    }
-
-    UIDialogService.create({
-      id: 'labelling',
-      isDraggable: false,
-      showOverlay: true,
-      centralize: true,
-      content: LabellingFlow,
-      contentProps: {
-        measurementData,
-        ...props.studyInfo,
-        labellingDoneCallback: () =>
-          UIDialogService.dismiss({ id: 'labelling' }),
-        updateLabelling: labellingData =>
-          _updateLabellingHandler(labellingData, measurementData),
-        ...contentProps,
-      },
-      ...props,
-    });
-  };
+  const showLabellingDialog = showLabellingDialogUnbound.bind(null, commandsManager, UIDialogService);
 
   const onRightClick = event => {
     console.log("onRightClick");
