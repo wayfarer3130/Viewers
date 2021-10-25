@@ -103,6 +103,8 @@ const DICOMVideoViewport = ({
 
   const onViewportClickHandler = () => setViewportActive(viewportIndex);
 
+  // The duplicated source elements below is to work around a firefox bug
+  // that sometimes fails to read the first value
   return (
     <div className="DICOMVideoViewport" onClick={onViewportClickHandler}>
       {state.isLoading && <LoadingIndicator />}
@@ -110,10 +112,12 @@ const DICOMVideoViewport = ({
         <video
           controls
           controlsList="nodownload"
-          src={state.src}
-          type={state.type}
           preload="auto"
-        ></video>
+        >
+          <source src={state.src} type={state.type} />
+          <source src={state.src} type={state.type} />
+          Video src/type not supported: <a href={state.src}>{state.src} of type {state.type}</a>
+        </video>
       )}
       {state.errorMessage && <div className="error">{state.errorMessage}</div>}
     </div>
