@@ -50,6 +50,7 @@ export default function init({ servicesManager, configuration }) {
     globalToolSyncEnabled: true,
     showSVGCursors: true,
     autoResizeViewports: false,
+    overlayColor: '#b026ff',
   };
 
   initCornerstoneTools(defaultCsToolsConfig);

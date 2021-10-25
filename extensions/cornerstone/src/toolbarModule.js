@@ -183,6 +183,14 @@ const definitions = [
         commandName: 'rotateViewportCW',
       },
       {
+        id: 'ToggleOverlay',
+        label: 'Toggle Overlay',
+        icon: 'sun',
+        //
+        type: TOOLBAR_BUTTON_TYPES.COMMAND,
+        commandName: 'toggleOverlay',
+      },
+      {
         id: 'FlipH',
         label: 'Flip H',
         icon: 'ellipse-h',

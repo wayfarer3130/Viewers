@@ -20,6 +20,14 @@ const refreshCornerstoneViewports = () => {
 
 const commandsModule = ({ servicesManager }) => {
   const actions = {
+    toggleOverlay: ({ viewports }) => {
+      const enabledElement = getEnabledElement(viewports.activeViewportIndex);
+      if (enabledElement) {
+        let viewport = cornerstone.getViewport(enabledElement);
+        viewport.overlayColor = viewport.overlayColor === false ? undefined : false;
+        cornerstone.setViewport(enabledElement, viewport);
+      }
+    },
     rotateViewport: ({ viewports, rotation }) => {
       const enabledElement = getEnabledElement(viewports.activeViewportIndex);
 
@@ -322,6 +330,11 @@ const commandsModule = ({ servicesManager }) => {
     },
     getActiveViewportEnabledElement: {
       commandFn: actions.getActiveViewportEnabledElement,
+      storeContexts: ['viewports'],
+      options: {},
+    },
+    toggleOverlay: {
+      commandFn: actions.toggleOverlay,
       storeContexts: ['viewports'],
       options: {},
     },

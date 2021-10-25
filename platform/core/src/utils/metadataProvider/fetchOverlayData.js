@@ -62,8 +62,12 @@ async function _getOverlayData(tag, server) {
 
   // TODO: Workaround for dcm4chee behind SSL-terminating proxy returning
   // incorrect bulk data URIs
-  if (server.wadoRoot.indexOf('https') === 0 && !uri.includes('https')) {
+  if (server.qidoRoot.indexOf('https') === 0 && !uri.includes('https')) {
     uri = uri.replace('http', 'https');
+  }
+
+  if (!uri.includes('http')) {
+    uri = server.qidoRoot + '/studies/' + uri;
   }
 
   const config = {
