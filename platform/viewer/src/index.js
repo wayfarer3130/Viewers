@@ -46,6 +46,6 @@ loadSearchConfigPoint(defaultTheme, '/theme', 'theme').catch(reason => {
   /** Create App */
   const app = React.createElement(App, appProps, null);
 
-  /** Render */
-  ReactDOM.render(app, document.getElementById('root'));
-})
+   /** Render */
+   ReactDOM.render(app, document.getElementById('root'));
+ })
