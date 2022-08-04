@@ -57,8 +57,10 @@ export default class ProtocolEngine {
     this._clearMatchedProtocols();
 
     // TODO: handle more than one study - this.studies has the list of studies
-    const matched = this.findMatchByStudy(this.study,
-      { studies: this.studies, displaySets: this.displaySets });
+    const matched = this.findMatchByStudy(this.study, {
+      studies: this.studies,
+      displaySets: this.displaySets,
+    });
 
     // For each matched protocol, check if it is already in MatchedProtocols
     matched.forEach(matchedDetail => {
@@ -79,12 +81,12 @@ export default class ProtocolEngine {
     });
   }
 
-  findMatch(metaData, rules, extraMatchData) {
+  findMatch(metaData, rules, options) {
     return HPMatcher.match(
       metaData,
       rules,
       this.customAttributeRetrievalCallbacks,
-      extraMatchData,
+      options
     );
   }
 
@@ -92,12 +94,12 @@ export default class ProtocolEngine {
    * Finds the best protocols from Protocol Store, matching each protocol matching rules
    * with the given study. The best protocol are ordered by score and returned in an array
    * @param  {Object} study StudyMetadata instance object
-   * @param {object} extraMatchData to match on.
+   * @param {object} options containing additional matching data.
    * @return {Array}       Array of match objects or an empty array if no match was found
    *                       Each match object has the score of the matching and the matched
    *                       protocol
    */
-  findMatchByStudy(study, extraMatchData) {
+  findMatchByStudy(study, options) {
     const matched = [];
 
     this.protocols.forEach(protocol => {
@@ -108,13 +110,13 @@ export default class ProtocolEngine {
       if (!rules || !rules.length) {
         console.warn(
           'ProtocolEngine::findMatchByStudy no matching rules - specify protocolMatchingRules',
-          protocol.id,
+          protocol.id
         );
         return;
       }
 
       // Run the matcher and get matching details
-      const matchedDetails = this.findMatch(study, rules, extraMatchData);
+      const matchedDetails = this.findMatch(study, rules, options);
       const score = matchedDetails.score;
 
       // The protocol matched some rule, add it to the matched list

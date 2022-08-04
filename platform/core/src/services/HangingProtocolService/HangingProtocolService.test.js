@@ -1,4 +1,4 @@
-import HangingProtocolServiceClass from "./HangingProtocolService";
+import HangingProtocolServiceClass from './HangingProtocolService';
 
 const testProtocol = {
   id: 'test',
@@ -9,10 +9,7 @@ const testProtocol = {
   modifiedDate: '2021-02-23T19:22:08.894Z',
   availableTo: {},
   editableBy: {},
-  toolGroupIds: [
-    'ctToolGroup',
-    'ptToolGroup',
-  ],
+  toolGroupIds: ['ctToolGroup', 'ptToolGroup'],
   imageLoadStrategy: 'interleaveTopToBottom', // "default" , "interleaveTopToBottom",  "interleaveCenter"
   protocolMatchingRules: [
     {
@@ -114,65 +111,53 @@ const displaySet2 = {
   SeriesInstanceUID: 'ds2',
   displaySetInstanceUID: 'displaySet2',
   Modality: 'PT',
-}
+};
 
 const displaySet3 = {
   ...displaySet1,
   numImageFrames: 3,
   displaySetInstanceUID: 'displaySet3',
-}
+};
 
 const studyMatchDisplaySets = [displaySet3, displaySet2, displaySet1];
 
-describe("HangingProtocolService", () => {
+describe('HangingProtocolService', () => {
   const commandsManager = {};
   const hps = new HangingProtocolServiceClass(commandsManager);
   let initialScaling;
 
   beforeAll(() => {
     hps.addProtocols([testProtocol]);
-    hps.addCustomViewportOptions('initialScale', 'Set initial scaling', (id, value) => (initialScaling = value));
-  })
+  });
 
   it('has one protocol', () => {
     expect(hps.getProtocols().length).toBe(1);
-  })
+  });
 
   describe('run', () => {
     it('matches best image match', () => {
-      hps.run({ studies: [studyMatch], displaySets: studyMatchDisplaySets })
+      hps.run({ studies: [studyMatch], displaySets: studyMatchDisplaySets });
       const state = hps.getState();
       const [matchDetails, alreadyApplied] = state;
       expect(alreadyApplied).toMatchObject([false]);
       expect(matchDetails.length).toBe(1);
-      expect(matchDetails[0]).toMatchObject(
-        {
-          viewportOptions: {
-            viewportId: 'ctAXIAL',
-            viewportType: 'volume',
-            orientation: 'axial',
-            toolGroupId: 'ctToolGroup',
-          },
-          // Matches ds1 because it matches 2 rules, a required and an optional
-          // ds2 fails to match required and ds3 fails to match an optional.
-          displaySetsInfo: [{
+      expect(matchDetails[0]).toMatchObject({
+        viewportOptions: {
+          viewportId: 'ctAXIAL',
+          viewportType: 'volume',
+          orientation: 'axial',
+          toolGroupId: 'ctToolGroup',
+        },
+        // Matches ds1 because it matches 2 rules, a required and an optional
+        // ds2 fails to match required and ds3 fails to match an optional.
+        displaySetsInfo: [
+          {
             SeriesInstanceUID: 'ds1',
             displaySetInstanceUID: 'displaySet1',
-            displaySetOptions: {}
-          }]
-        }
-      )
-    })
-  })
-  describe('applyCustomViewportSettings', () => {
-    it('Calls custom apply method', () => {
-      hps.run({ studies: [studyMatch], displaySets: studyMatchDisplaySets })
-      const state = hps.getState();
-      const [matchDetails, alreadyApplied] = state;
-      const { viewportOptions } = matchDetails[0]
-      initialScaling = undefined;
-      hps.applyCustomViewportOptions(viewportOptions, {});
-      expect(initialScaling).toBe(2.5);
-    })
-  })
+            displaySetOptions: {},
+          },
+        ],
+      });
+    });
+  });
 });

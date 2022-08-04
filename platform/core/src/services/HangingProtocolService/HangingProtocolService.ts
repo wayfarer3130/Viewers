@@ -1,6 +1,8 @@
 import pubSubServiceInterface from '../_shared/pubSubServiceInterface';
 import sortBy from '../../utils/sortBy';
 import ProtocolEngine from './ProtocolEngine';
+import StudyMetadata from '../DicomMetadataStore/StudyMetadata';
+import DisplaySet from '../DisplaySetService/DisplaySet';
 
 const EVENTS = {
   STAGE_CHANGE: 'event::hanging_protocol_stage_change',
@@ -10,23 +12,22 @@ const EVENTS = {
 };
 
 class HangingProtocolService {
-  studies: object[];
+  studies: StudyMetadata[];
   protocols: object[];
   protocol: object;
   stage: number;
   _commandsManager: object;
-  ProtocolEngine: object;
+  protocolEngine: ProtocolEngine;
   matchDetails: object[];
   hpAlreadyApplied: boolean[] = [];
   customViewportSettings = [];
-  displaySets = [];
+  displaySets: DisplaySet[] = [];
   activeStudy: object;
   debugLogging: false;
 
   customAttributeRetrievalCallbacks = {
     NumberOfStudyRelatedSeries: {
       name: 'The number of series in the study',
-      // TODO - make this number of display sets instead, if available
       callback: metadata =>
         metadata.NumberOfStudyRelatedSeries ?? metadata.series?.length,
     },
@@ -68,7 +69,7 @@ class HangingProtocolService {
   constructor(commandsManager) {
     this._commandsManager = commandsManager;
     this.protocols = [];
-    this.ProtocolEngine = undefined;
+    this.protocolEngine = undefined;
     this.protocol = undefined;
     this.stage = undefined;
     /**
@@ -138,14 +139,14 @@ class HangingProtocolService {
     this.displaySets = displaySets;
     this.activeStudy = activeStudy || studies[0];
 
-    this.ProtocolEngine = new ProtocolEngine(
+    this.protocolEngine = new ProtocolEngine(
       this.protocols,
       this.customAttributeRetrievalCallbacks
     );
 
     // if there is no pre-defined protocol
     if (!protocol || protocol.id === undefined) {
-      const matchedProtocol = this.ProtocolEngine.run({
+      const matchedProtocol = this.protocolEngine.run({
         studies: this.studies,
         activeStudy,
         displaySets,
@@ -463,11 +464,13 @@ class HangingProtocolService {
       seriesMatchingRules
     );
     this.studies.forEach(study => {
-      // TODO - only pass in display sets matching the top level study being tested
-      const studyMatchDetails = this.ProtocolEngine.findMatch(
+      const studyDisplaySets = this.displaySets.filter(
+        it => it.StudyInstanceUID === study.StudyInstanceUID
+      );
+      const studyMatchDetails = this.protocolEngine.findMatch(
         study,
         studyMatchingRules,
-        { studies: this.studies, displaySets: this.displaySets }
+        { studies: this.studies, displaySets: studyDisplaySets }
       );
 
       // Prevent bestMatch from being updated if the matchDetails' required attribute check has failed
@@ -490,7 +493,7 @@ class HangingProtocolService {
           displaySetInstanceUID,
         } = displaySet;
         if (StudyInstanceUID !== study.StudyInstanceUID) return;
-        const seriesMatchDetails = this.ProtocolEngine.findMatch(
+        const seriesMatchDetails = this.protocolEngine.findMatch(
           displaySet,
           seriesMatchingRules,
           { studies: this.studies, instance: displaySet.images?.[0] }
@@ -602,7 +605,7 @@ class HangingProtocolService {
    * Check if the previous stage is available
    * @return {Boolean} True if previous stage is available or false otherwise
    */
-  _isPreviousStageAvailable() {
+  _isPreviousStageAvailable(): boolean {
     return this.stage - 1 >= 0;
   }
 
@@ -613,7 +616,7 @@ class HangingProtocolService {
    * @param {Integer} stageAction An integer value specifying wheater next (1) or previous (-1) stage
    * @return {Boolean} True if new stage has set or false, otherwise
    */
-  _setCurrentProtocolStage(stageAction) {
+  _setCurrentProtocolStage(stageAction): boolean {
     //reseting the applied protocols
     this.hpAlreadyApplied = [];
     // Check if previous or next stage is available
