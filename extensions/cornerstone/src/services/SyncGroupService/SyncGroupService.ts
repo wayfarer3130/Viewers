@@ -6,20 +6,36 @@ const EVENTS = {
   TOOL_GROUP_CREATED: 'event::cornerstone::syncgroupservice:toolgroupcreated',
 };
 
+export type SyncCreator = (
+  type: string,
+  options?: Record<string, unknown>
+) => unknown;
+
 export type SyncGroup = {
   type: string;
-  id: string;
-  source: boolean;
-  target: boolean;
+  id?: string;
+  // Source and target default to true if not specified
+  source?: boolean;
+  target?: boolean;
+  options?: Record<string, unknown>;
 };
 
 const POSITION = 'cameraposition';
 const VOI = 'voi';
+const ZOOMPAN = 'zoompan';
+
+const asSyncGroup = (syncGroup: string | SyncGroup): SyncGroup =>
+  typeof syncGroup === 'string' ? { type: syncGroup } : syncGroup;
 
 export default class SyncGroupService {
   serviceManager: any;
   listeners: { [key: string]: (...args: any[]) => void } = {};
   EVENTS: { [key: string]: string };
+  synchronizerCreators: Record<string, SyncCreator> = {
+    [POSITION]: synchronizers.createCameraPositionSynchronizer,
+    [VOI]: synchronizers.createVOISynchronizer,
+    [ZOOMPAN]: synchronizers.createZoomPanSynchronizer,
+  };
 
   constructor(serviceManager) {
     this.serviceManager = serviceManager;
@@ -29,31 +45,44 @@ export default class SyncGroupService {
     Object.assign(this, pubSubServiceInterface);
   }
 
-  private _createSynchronizer(type: string, id: string) {
-    type = type.toLowerCase();
-    if (type === POSITION) {
-      return synchronizers.createCameraPositionSynchronizer(id);
-    } else if (type === VOI) {
-      return synchronizers.createVOISynchronizer(id);
+  private _createSynchronizer(type: string, id: string, options) {
+    const syncCreator = this.synchronizerCreators[type.toLowerCase()];
+    if (syncCreator) {
+      return syncCreator(id, options);
+    } else {
+      console.warn('Unknown synchronizer type', type, id);
     }
+  }
+
+  /**
+   * Creates a synchronizer type.
+   * @param type is the type of the synchronizer to create
+   * @param creator
+   */
+  public setSynchronizer(type: string, creator: SyncCreator): void {
+    this.synchronizerCreators[type] = creator;
   }
 
   public addViewportToSyncGroup(
     viewportId: string,
     renderingEngineId: string,
-    syncGroups?: SyncGroup[]
+    syncGroups?: (SyncGroup | string)[]
   ): void {
     if (!syncGroups || !syncGroups.length) {
+      console.log('No sync groups', viewportId);
       return;
     }
 
     syncGroups.forEach(syncGroup => {
-      const { type, id, target, source } = syncGroup;
+      console.log('syncGroup', syncGroup);
+      const syncGroupObj = asSyncGroup(syncGroup);
+      const { type, target = true, source = true, options } = syncGroupObj;
+      const { id = type } = syncGroupObj;
 
       let synchronizer = SynchronizerManager.getSynchronizer(id);
 
       if (!synchronizer) {
-        synchronizer = this._createSynchronizer(type, id);
+        synchronizer = this._createSynchronizer(type, id, options);
       }
 
       if (target && source) {
