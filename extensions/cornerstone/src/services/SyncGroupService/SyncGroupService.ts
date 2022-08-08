@@ -63,43 +63,53 @@ export default class SyncGroupService {
     this.synchronizerCreators[type] = creator;
   }
 
+  protected _getOrCreateSynchronizer(
+    type: string,
+    id: string,
+    options?: Record<string, unknown>
+  ): Synchronizer {
+    let synchronizer = SynchronizerManager.getSynchronizer(id);
+
+    if (!synchronizer) {
+      synchronizer = this._createSynchronizer(type, id, options);
+    }
+    return synchronizer;
+  }
+
   public addViewportToSyncGroup(
     viewportId: string,
     renderingEngineId: string,
     syncGroups?: (SyncGroup | string)[]
   ): void {
     if (!syncGroups || !syncGroups.length) {
-      console.log('No sync groups', viewportId);
       return;
     }
 
     syncGroups.forEach(syncGroup => {
-      console.log('syncGroup', syncGroup);
       const syncGroupObj = asSyncGroup(syncGroup);
       const { type, target = true, source = true, options } = syncGroupObj;
       const { id = type } = syncGroupObj;
 
-      let synchronizer = SynchronizerManager.getSynchronizer(id);
-
-      if (!synchronizer) {
-        synchronizer = this._createSynchronizer(type, id, options);
-      }
+      const synchronizer = this._getOrCreateSynchronizer(type, id, options);
 
       if (target && source) {
         synchronizer.add({
           viewportId,
           renderingEngineId,
+          options,
         });
         return;
       } else if (source) {
         synchronizer.addSource({
           viewportId,
           renderingEngineId,
+          options,
         });
       } else if (target) {
         synchronizer.addTarget({
           viewportId,
           renderingEngineId,
+          options,
         });
       }
     });
