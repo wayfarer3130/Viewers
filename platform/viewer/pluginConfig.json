@@ -1,7 +1,23 @@
 {
+  "directories": {
+    "src": {
+      "relativeTo": "OHIF",
+      "directory": ".."
+    },
+    "config-point": {
+      "comment": "This example shows how to add a directory location, with git information",
+      "relativeTo": "src",
+      "directory": "config-point",
+      "git": "https://github.com/OHIF/config-point.git"
+    }
+  },
   "extensions": [
     {
       "packageName": "@ohif/extension-cornerstone",
+      "version": "3.0.0"
+    },
+    {
+      "packageName": "@ohif/extension-tmtv",
       "version": "3.0.0"
     },
     {
@@ -25,7 +41,15 @@
       "version": "3.0.1"
     },
     {
-      "packageName": "@ohif/extension-tmtv",
+      "packageName": "@radicalimaging/hp-extension",
+      "version": "3.0.0"
+    },
+    {
+      "packageName": "@radicalimaging/ecg-dicom",
+      "version": "3.0.4"
+    },
+    {
+      "packageName": "@radicalimaging/microscopy-dicom",
       "version": "3.0.0"
     }
   ],
@@ -33,10 +57,36 @@
     {
       "packageName": "@ohif/mode-longitudinal",
       "version": "3.0.0"
+    },
+    {
+      "packageName": "@radicalimaging/mode-hp",
+      "version": "3.0.0"
+    },
+    {
+      "packageName": "mode-ecg",
+      "version": "3.0.5"
+    },
+    {
+      "packageName": "@radicalimaging/mode-ecg",
+      "version": "3.0.5"
+    },
+    {
+      "packageName": "@radicalimaging/mode-microscopy",
+      "version": "3.0.5"
     }
   ],
-  "modesFactory": [
-  ],
-  "umd": [
+  "packages": [
+    "@ohif/core",
+    "@ohif/ui",
+    "@ohif/extension-tmtv",
+    "@ohif/mode-tmtv",
+    "dcmjs",
+    "react",
+    {
+      "comment": "This is a UMD dependency example, available only if checked out and built in the config-point directory above.",
+      "packageName": "config-point",
+      "relativeTo": "config-point",
+      "directory": "."
+    }
   ]
 }

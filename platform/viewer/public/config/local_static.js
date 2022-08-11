@@ -1,8 +1,19 @@
 window.config = {
   routerBasename: '/',
-  // whiteLabelling: {},
-  extensions: [],
-  modes: [],
+  // Extensions added to the base set, defined by name.
+  // The unknown tests the load of missing dependencies (sends a message but no error)
+  extensions: [
+    '@ohif/extension-tmtv',
+    '@ohif/extension-cornerstone',
+    '@radicalimaging/hp-extension',
+    'unknown',
+  ],
+  modes: [
+    '@ohif/mode-longitudinal',
+    '@radicalimaging/mode-hp',
+    '@radicalimaging/mode-ecg',
+    '@radicalimaging/mode-microscopy',
+  ],
   showStudyList: true,
   maxNumberOfWebWorkers: 3,
   // filterQueryParam: false,
