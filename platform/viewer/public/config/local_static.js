@@ -11,6 +11,7 @@ window.config = {
   modes: [
     '@ohif/mode-longitudinal',
     '@radicalimaging/mode-hp',
+    '@radicalimaging/volume-mode',
     '@radicalimaging/mode-ecg',
     '@radicalimaging/mode-microscopy',
   ],

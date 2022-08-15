@@ -63,8 +63,8 @@
       "version": "3.0.0"
     },
     {
-      "packageName": "mode-ecg",
-      "version": "3.0.5"
+      "packageName": "@radicalimaging/volume-mode",
+      "version": "3.0.0"
     },
     {
       "packageName": "@radicalimaging/mode-ecg",
@@ -87,6 +87,12 @@
       "packageName": "config-point",
       "relativeTo": "config-point",
       "directory": "."
+    },
+    {
+      "packageName": "@radicalimaging/config-mode",
+      "relativeTo": "src",
+      "hot": true,
+      "directory": "OHIFExtensionsAndModes/modes/config-mode"
     }
   ]
 }

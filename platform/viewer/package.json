@@ -59,6 +59,8 @@
     "@ohif/mode-longitudinal": "^3.0.0",
     "@ohif/mode-tmtv": "^3.0.0",
     "@ohif/ui": "^2.0.0",
+    "@radicalimaging/microscopy-dicom": "^3.0.5",
+    "@radicalimaging/mode-ecg": "^3.0.9",
     "@types/react": "^16.0.0",
     "classnames": "^2.2.6",
     "core-js": "^3.16.1",

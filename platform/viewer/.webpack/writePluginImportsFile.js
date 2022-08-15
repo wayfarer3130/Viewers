@@ -41,8 +41,17 @@ const staticBlock = [
   "export const defaultHotLoad = [];\n",
   "// Loads the default hot load list, and waits for any hot load functions",
   "const pluginImports = (hotLoad = defaultHotLoad) =>",
-  "  Promise.all(hotLoad.map(it => umdLoader(it))).then(loaded => loaded.map(",
-  "    it => it?.hotLoad?.() ) )",
+  "Promise.all(hotLoad.map(it => umdLoader(it))).then(loaded => {",
+  "  return Promise.all(loaded.map(",
+  "    it => {",
+  "      const hotLoadF = it?.default?.hotLoad || it?.hotLoad;",
+  "      if (hotLoadF) {",
+  "        hotLoadF();",
+  "      }",
+  "    })",
+  "  )",
+  "}",
+  ");",
   "export default pluginImports;\n"
 ];
 
