@@ -207,9 +207,7 @@ class HangingProtocolService {
    * Sets the active hanging protocols to use, by name.  If the value is empty,
    * then resets the active protocols to all the named items.
    */
-  public setActiveProtocols(
-    hangingProtocol?: string[] | string
-  ): void {
+  public setActiveProtocols(hangingProtocol?: string[] | string): void {
     if (!hangingProtocol || !hangingProtocol.length) {
       this.activeProtocolIds = null;
       console.log('No active protocols, setting all to active');

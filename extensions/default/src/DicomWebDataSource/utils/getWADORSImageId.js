@@ -3,12 +3,26 @@ function buildInstanceWadoRsUri(instance, config) {
   return `${config.wadoRoot}/studies/${StudyInstanceUID}/series/${SeriesInstanceUID}/instances/${SOPInstanceUID}`;
 }
 
+/**
+ *
+ * @returns query parameters for request
+ */
+const buildQueryParams = (instance, config) => {
+  const { singlepart = '' } = config;
+  let ret = '';
+  if (singlepart.indexOf('image') !== -1) {
+    ret = `?accept=image/jphc`;
+  }
+  return ret;
+};
+
 function buildInstanceFrameWadoRsUri(instance, config, frame) {
   const baseWadoRsUri = buildInstanceWadoRsUri(instance, config);
 
   frame = frame || 1;
 
-  return `${baseWadoRsUri}/frames/${frame}`;
+  const queryParams = buildQueryParams(instance, config);
+  return `${baseWadoRsUri}/frames/${frame}${queryParams}`;
 }
 
 // function getWADORSImageUrl(instance, frame) {

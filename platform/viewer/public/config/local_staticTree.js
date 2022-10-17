@@ -1,10 +1,6 @@
 window.config = {
   routerBasename: '/',
-  whiteLabeling: {
-    logoComponent: {
-      label: 'FlexView',
-    },
-  },
+  // whiteLabelling: {},
   extensions: [],
   modes: [],
   showStudyList: true,
@@ -13,8 +9,8 @@ window.config = {
   dataSources: [
     {
       friendlyName: 'Static WADO Local Data',
-      namespace: '@ohif/extension-default.dataSourcesModule.dicomweb',
-      sourceName: 'dicomweb',
+      namespace: '@radicalimaging/tree-metadata.dataSourcesModule.dicomwebTree',
+      sourceName: 'dicomwebTree',
       configuration: {
         name: 'DCM4CHEE',
         wadoUriRoot: 'http://localhost:5000/dicomweb',
@@ -28,8 +24,7 @@ window.config = {
         supportsFuzzyMatching: false,
         supportsWildcard: true,
         staticWado: true,
-        // Add image to fetch single part
-        singlepart: 'bulkdata,video,pdf',
+        singlepart: 'bulkdata,video,pdf,image/jphc',
       },
     },
     {
@@ -73,14 +68,8 @@ window.config = {
   //       ))
   //   },
   // },
-  defaultDataSourceName: 'dicomweb',
+  defaultDataSourceName: 'dicomwebTree',
   hotkeys: [
-    {
-      commandName: 'showViewerContextMenu',
-      label: 'Show Viewer Context Menu',
-      keys: ['ctrl+d'],
-    },
-    // Now the default set
     {
       commandName: 'incrementActiveViewport',
       label: 'Next Viewport',

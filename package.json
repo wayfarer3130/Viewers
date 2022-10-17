@@ -57,7 +57,12 @@
   "dependencies": {
     "@babel/runtime": "7.16.3",
     "@kitware/vtk.js": "^24.18.7",
-    "core-js": "^3.2.1"
+    "core-js": "^3.2.1",
+    "@radicalimaging/hp-extension": "^3.4.2",
+    "@radicalimaging/config-mode": "^3.4.2",
+    "@radicalimaging/volume-mode": "^3.4.2",
+    "@radicalimaging/findings-mode": "^3.4.2",
+    "@radicalimaging/hp-mode": "^3.4.2"
   },
   "peerDependencies": {
     "react": "17.0.2",

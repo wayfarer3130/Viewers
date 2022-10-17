@@ -250,7 +250,6 @@ export default function ModeRoute({
     hangingProtocolService.setActiveProtocols(hangingProtocol);
     mode?.onModeEnter({ servicesManager, extensionManager, commandsManager });
 
-
     const setupRouteInit = async () => {
       if (route.init) {
         return await route.init(

@@ -423,7 +423,8 @@ class MetadataProvider {
       imageId.startsWith('wadors:') ||
       imageId.startsWith('streaming-wadors:')
     ) {
-      const strippedImageId = imageId.split('/studies/')[1];
+      // Get the string between the studies and the ? if any
+      const strippedImageId = imageId.split(/\/studies\/|\?/)[1];
       const splitImageId = strippedImageId.split('/');
 
       return {

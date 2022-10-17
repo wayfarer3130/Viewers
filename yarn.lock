@@ -4462,6 +4462,56 @@
   resolved "https://registry.yarnpkg.com/@polka/url/-/url-1.0.0-next.21.tgz#5de5a2385a35309427f6011992b544514d559aa1"
   integrity sha512-a5Sab1C4/icpTZVzZc5Ghpz88yQtGOyNqYXcZgOssB2uuAr+wF/MvN6bgtW32q7HHrvBki+BsZ0OuNv6EV3K9g==
 
+"@radicalimaging/config-mode@^3.4.2":
+  version "3.4.2"
+  resolved "https://registry.yarnpkg.com/@radicalimaging/config-mode/-/config-mode-3.4.2.tgz#cb60a9cd63d5c49a2a3172962e59080f99513c9b"
+  integrity sha512-/OKPtxCUSM97lHntuGV39jifL1f23jvmfmW/cH78H6zarnnz8VphBCPLR/BEsFnZRjgoGhU2kLwSrwKAS9cHbw==
+  dependencies:
+    "@babel/runtime" "7.7.6"
+    "@cornerstonejs/tools" "^0.24.1"
+    config-point "^0.4.8"
+    gl-matrix "^3.4.3"
+    lodash "^4.17.21"
+    lodash.clonedeep "^4.5.0"
+    lodash.get "^4.4.2"
+
+"@radicalimaging/findings-mode@^3.4.3":
+  version "3.4.2"
+  resolved "https://registry.yarnpkg.com/@radicalimaging/findings-mode/-/findings-mode-3.4.2.tgz#dcd6511481c610d509a2624f61ab410cbd2bb5e8"
+  integrity sha512-lAN1OBTMAm4fMUQ7VO5W27r1a1dyPsIhg82wqEM5ecfpf1HR2eqITpTesidEY6WPRGvTLH7+qpeS5XuOic4TjA==
+  dependencies:
+    "@babel/runtime" "7.7.6"
+    "@radicalimaging/config-mode" "^3.4.2"
+    config-point "^0.4.8"
+
+"@radicalimaging/hp-extension@^3.4.2":
+  version "3.4.2"
+  resolved "https://registry.yarnpkg.com/@radicalimaging/hp-extension/-/hp-extension-3.4.2.tgz#73e6a36c1938622e0dd2114c40ff9625a3d7bfc4"
+  integrity sha512-EPKvBbTsDGgCkbtctOHatL8OmZFq2RmGXe3kGICrilh3B4ph6wrp9Xl8QFXXaApZRO9HqrrAIV619Rto1wmfmg==
+  dependencies:
+    "@babel/runtime" "7.7.6"
+    "@cornerstonejs/tools" "^0.24.1"
+    config-point "^0.4.8"
+    lodash "^4.17.21"
+
+"@radicalimaging/hp-mode@^3.4.2":
+  version "3.4.2"
+  resolved "https://registry.yarnpkg.com/@radicalimaging/hp-mode/-/hp-mode-3.4.2.tgz#5ae60e3976ec098335a2ebc258eeaa01bb0543f5"
+  integrity sha512-jbAKjYcVGtL/AutMl+b6lfDRMDL5WSFkNxB7L8TR0bp006cttedRH7LSNOwObj1ES/hA40cCzjePL72IHkvuNA==
+  dependencies:
+    "@babel/runtime" "7.7.6"
+    "@radicalimaging/config-mode" "^3.4.2"
+    config-point "^0.4.8"
+
+"@radicalimaging/volume-mode@^3.4.3":
+  version "3.4.4"
+  resolved "https://registry.yarnpkg.com/@radicalimaging/volume-mode/-/volume-mode-3.4.4.tgz#d464f4ac8db6692ceaadebd776aa65b160f628e2"
+  integrity sha512-uvxrJBqz108x8cN96VsC4Ir+qenVF0mJeig4+VhT0sG42F93PraLGXPSKENmsxjXLTgjHGvzzH7WPJauAwN8Sw==
+  dependencies:
+    "@babel/runtime" "7.7.6"
+    "@radicalimaging/config-mode" "^3.4.2"
+    config-point "^0.4.8"
+
 "@reach/router@^1.3.4":
   version "1.3.4"
   resolved "https://registry.yarnpkg.com/@reach/router/-/router-1.3.4.tgz#d2574b19370a70c80480ed91f3da840136d10f8c"
@@ -12486,7 +12536,7 @@ gitignore@^0.7.0:
   resolved "https://registry.yarnpkg.com/gitignore/-/gitignore-0.7.0.tgz#062173df62344a572dfd76d98b59c45108562739"
   integrity sha512-6iE891OyeYQYVvdoWI/hcxDWJ0sOngSpIRadxLoYbsnZdqWIUsEfx+IrOpW3d/zWBA/eKYvs6ZZx6ogz2wEGoQ==
 
-gl-matrix@3.4.3, gl-matrix@^3.1.0:
+gl-matrix@3.4.3, gl-matrix@^3.1.0, gl-matrix@^3.4.3:
   version "3.4.3"
   resolved "https://registry.yarnpkg.com/gl-matrix/-/gl-matrix-3.4.3.tgz#fc1191e8320009fd4d20e9339595c6041ddc22c9"
   integrity sha512-wcCp8vu8FT22BnvKVPjXa/ICBWRq/zjFfdofZy1WSpQZpphblv12/bOQLBC1rMM7SGOFS9ltVmKOHil5+Ml7gA==

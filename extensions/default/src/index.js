@@ -8,6 +8,7 @@ import getHangingProtocolModule from './getHangingProtocolModule';
 import getStudiesForPatientByStudyInstanceUID from './Panels/getStudiesForPatientByStudyInstanceUID';
 import { id } from './id.js';
 import init from './init';
+import getCustomizationModule from './getCustomizationModule';
 
 const defaultExtension = {
   /**
@@ -36,6 +37,7 @@ const defaultExtension = {
       },
     ];
   },
+  getCustomizationModule,
 };
 
 export default defaultExtension;
