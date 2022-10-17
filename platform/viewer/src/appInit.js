@@ -16,6 +16,7 @@ import {
   CineService,
   UserAuthenticationService,
   errorHandler,
+  UICustomizationServiceRegistration,
   // utils,
 } from '@ohif/core';
 
@@ -51,6 +52,7 @@ async function appInit(appConfigOrFunc, defaultExtensions, defaultModes) {
     UIViewportDialogService,
     MeasurementService,
     DisplaySetService,
+    [UICustomizationServiceRegistration, appConfig],
     ToolBarService,
     ViewportGridService,
     HangingProtocolService,

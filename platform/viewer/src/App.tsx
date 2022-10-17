@@ -71,6 +71,7 @@ function App({ config, defaultExtensions, defaultModes }) {
     ViewportGridService,
     CineService,
     UserAuthenticationService,
+    uiCustomizationService,
   } = servicesManager.services;
 
   const providers = [
@@ -89,6 +90,9 @@ function App({ config, defaultExtensions, defaultModes }) {
     Compose({ components: providers, children });
 
   let authRoutes = null;
+
+  // Should there be a generic call to init on the extension manager?
+  uiCustomizationService.init(extensionManager);
 
   if (oidc) {
     authRoutes = (
@@ -116,9 +120,7 @@ App.propTypes = {
     PropTypes.shape({
       routerBasename: PropTypes.string.isRequired,
       oidc: PropTypes.array,
-      whiteLabeling: PropTypes.shape({
-        createLogoComponentFn: PropTypes.func,
-      }),
+      whiteLabeling: PropTypes.object,
       extensions: PropTypes.array,
     }),
   ]).isRequired,

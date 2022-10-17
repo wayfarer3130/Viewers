@@ -24,6 +24,7 @@ describe('Top level exports', () => {
       'OHIF',
       //
       'CineService',
+      'UICustomizationServiceRegistration',
       'UIDialogService',
       'UIModalService',
       'UINotificationService',

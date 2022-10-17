@@ -18,6 +18,7 @@ these components from an extension.
 
 We maintain the following UI Services:
 
+- [UI Customization Service](ui-customization-service.md)
 - [UI Notification Service](ui-notification-service.md)
 - [UI Modal Service](ui-modal-service.md)
 - [UI Dialog Service](ui-dialog-service.md)

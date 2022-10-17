@@ -28,6 +28,7 @@ import {
   pubSubServiceInterface,
   UserAuthenticationService,
   SegmentationService,
+  UICustomizationServiceRegistration,
 } from './services';
 
 import IWebApiDataSource from './DataSources/IWebApiDataSource';
@@ -58,6 +59,7 @@ const OHIF = {
   viewer: {},
   //
   CineService,
+  UICustomizationServiceRegistration,
   UIDialogService,
   UIModalService,
   UINotificationService,
@@ -94,6 +96,7 @@ export {
   DICOMWeb,
   //
   CineService,
+  UICustomizationServiceRegistration,
   UIDialogService,
   UIModalService,
   UINotificationService,
